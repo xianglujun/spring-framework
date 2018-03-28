@@ -23,17 +23,20 @@ package org.springframework.cglib.core;
  * <p>This is primarily designed to avoid clashes between a regular CGLIB
  * version (used by some other library) and Spring's embedded variant,
  * in case the same class happens to get proxied for different purposes.
+ * <p>
+ * 在spring 3.2版本之后，spring不再依赖cglib.jar包，而是通过将cglib的包中的内容，集成到
+ * org.springframework.cglib.包下，这样来避免spring因为依赖cglibjar包版本问题而引起的冲突
  *
  * @author Juergen Hoeller
  * @since 3.2.8
  */
 public class SpringNamingPolicy extends DefaultNamingPolicy {
 
-	public static final SpringNamingPolicy INSTANCE = new SpringNamingPolicy();
+    public static final SpringNamingPolicy INSTANCE = new SpringNamingPolicy();
 
-	@Override
-	protected String getTag() {
-		return "BySpringCGLIB";
-	}
+    @Override
+    protected String getTag() {
+        return "BySpringCGLIB";
+    }
 
 }
