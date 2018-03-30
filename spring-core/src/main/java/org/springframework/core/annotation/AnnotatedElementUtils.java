@@ -38,6 +38,12 @@ import org.springframework.util.MultiValueMap;
  */
 public class AnnotatedElementUtils {
 
+    /**
+     * 获取注解元素数据
+     * @param element
+     * @param annotationType
+     * @return
+     */
     public static Set<String> getMetaAnnotationTypes(AnnotatedElement element, String annotationType) {
         final Set<String> types = new LinkedHashSet<String>();
         process(element, annotationType, false, new Processor<Object>() {
