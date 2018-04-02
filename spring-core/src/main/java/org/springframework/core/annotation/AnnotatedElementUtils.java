@@ -40,6 +40,7 @@ public class AnnotatedElementUtils {
 
     /**
      * 获取注解元素数据
+     *
      * @param element
      * @param annotationType
      * @return
@@ -62,6 +63,16 @@ public class AnnotatedElementUtils {
         return (types.isEmpty() ? null : types);
     }
 
+    /**
+     * <pre>
+     *     元数据定义: 注解的注解被称为元注解
+     * </pre>
+     * 查看是否包含了指定的元注解元素,只是包含了直接至上的注解，因此不包含直接的注解
+     *
+     * @param element        需要查看的元素信息
+     * @param annotationType 指定的注解类型
+     * @return
+     */
     public static boolean hasMetaAnnotationTypes(AnnotatedElement element, String annotationType) {
         return Boolean.TRUE.equals(process(element, annotationType, false, new Processor<Boolean>() {
             @Override
@@ -78,6 +89,13 @@ public class AnnotatedElementUtils {
         }));
     }
 
+    /**
+     * 判断是否被指定的注解所注解
+     *
+     * @param element
+     * @param annotationType
+     * @return
+     */
     public static boolean isAnnotated(AnnotatedElement element, String annotationType) {
         return Boolean.TRUE.equals(process(element, annotationType, false, new Processor<Boolean>() {
             @Override
@@ -91,10 +109,24 @@ public class AnnotatedElementUtils {
         }));
     }
 
+    /**
+     * 获取指定注解元素的注解属性
+     * @param element 注解元素
+     * @param annotationType 注解类型
+     * @return
+     */
     public static AnnotationAttributes getAnnotationAttributes(AnnotatedElement element, String annotationType) {
         return getAnnotationAttributes(element, annotationType, false, false);
     }
 
+    /**
+     * 获取注解的所有的注解属性
+     * @param element 注解元素
+     * @param annotationType 注解类型
+     * @param classValuesAsString
+     * @param nestedAnnotationsAsMap
+     * @return
+     */
     public static AnnotationAttributes getAnnotationAttributes(AnnotatedElement element, String annotationType,
                                                                final boolean classValuesAsString, final boolean nestedAnnotationsAsMap) {
 
@@ -122,6 +154,15 @@ public class AnnotatedElementUtils {
         return getAllAnnotationAttributes(element, annotationType, false, false);
     }
 
+    /**
+     * 获取所有注解的属性信息
+     *
+     * @param element                需要查看的元素信息
+     * @param annotationType         注解类型
+     * @param classValuesAsString    是否将注解属性的值转换为字符串
+     * @param nestedAnnotationsAsMap
+     * @return
+     */
     public static MultiValueMap<String, Object> getAllAnnotationAttributes(AnnotatedElement element,
                                                                            final String annotationType, final boolean classValuesAsString, final boolean nestedAnnotationsAsMap) {
 
