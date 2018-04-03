@@ -53,6 +53,11 @@ public abstract class BridgeMethodResolver {
      * <p>It is safe to call this method passing in a non-bridge {@link Method} instance.
      * In such a case, the supplied {@link Method} instance is returned directly to the caller.
      * Callers are <strong>not</strong> required to check for bridging before calling this method.
+     * <p>
+     * 从提供的桥接方法中获取的该桥接方法的原始方法。
+     * 当通过非桥接方法实例来调用这个方法时，是一个安全的行为，不会抛出任何异常，直接返回方法本身
+     * 在这种情况下，该方法直接返回{@link Method}实例给调用者
+     * 在调用该方法之前，不需要对是否为桥接方法进行校验
      *
      * @param bridgeMethod the method to introspect
      * @return the original method (either the bridged method or the passed-in method
@@ -60,7 +65,7 @@ public abstract class BridgeMethodResolver {
      */
     public static Method findBridgedMethod(Method bridgeMethod) {
 
-        // 判断是否为桥接方法
+        // 判断是否为桥接方法,如果为非桥接方法，直接返回
         if (bridgeMethod == null || !bridgeMethod.isBridge()) {
             return bridgeMethod;
         }
@@ -78,6 +83,8 @@ public abstract class BridgeMethodResolver {
         }
 
         // Now perform simple quick check.
+        // 如果Class中本身就只有一个方法匹配，则直接认为是
+        // 该桥接方法的源方法
         if (candidateMethods.size() == 1) {
             return candidateMethods.get(0);
         }
@@ -100,6 +107,12 @@ public abstract class BridgeMethodResolver {
      * consider a validate candidate for the {@link Method} that is {@link Method#isBridge() bridged}
      * by the supplied {@link Method bridge Method}. This method performs inexpensive
      * checks and can be used quickly filter for a set of possible matches.
+     * <p>
+     * 判断是否为桥接方法:
+     * 1. 根据Method判断 candidate {@link Method}是否为桥接方法，如果本身为桥接方法，直接返回false
+     * 2. 判断candidate {@link Method} 和 bridge {@link Method}方法是否相等，相等则返回false
+     * 3. 判断方法名称是否一致
+     * 4. 判断方法参数是否一致
      */
     private static boolean isBridgedCandidateFor(Method candidateMethod, Method bridgeMethod) {
         return (!candidateMethod.isBridge() && !candidateMethod.equals(bridgeMethod) &&
@@ -109,6 +122,8 @@ public abstract class BridgeMethodResolver {
 
     /**
      * Searches for the bridged method in the given candidates.
+     * <p>
+     * 从{@link Method}列表中获取到bridge {@link Method}的原始方法，该方法可能会返回null
      *
      * @param candidateMethods the List of candidate Methods
      * @param bridgeMethod     the bridge method
@@ -135,7 +150,7 @@ public abstract class BridgeMethodResolver {
     /**
      * Determines whether or not the bridge {@link Method} is the bridge for the
      * supplied candidate {@link Method}.
-     *
+     * <p>
      * 判断是否bridge {@link Method} 是提供的candidate {@link Method}的桥接方法
      */
     static boolean isBridgeMethodFor(Method bridgeMethod, Method candidateMethod, Class<?> declaringClass) {
@@ -180,6 +195,13 @@ public abstract class BridgeMethodResolver {
      * {@link Method#getGenericParameterTypes() generic Method} and concrete {@link Method}
      * are equal after resolving all types against the declaringType, otherwise
      * returns {@code false}.
+     * <p>
+     * 当 {@link Type}通过{@link Method#getGenericParameterTypes()} generic Method} 和具体的方法对象相等，则返回ture
+     * 其他情况都返回false.
+     *
+     * @param genericMethod 泛型方法，则是需要判断是否为桥接方法的原始{@link Method}对象
+     * @param candidateMethod 桥接方法
+     * @param declaringClass 桥接方法所在的类对象
      */
     private static boolean isResolvedTypeMatch(
             Method genericMethod, Method candidateMethod, Class<?> declaringClass) {
