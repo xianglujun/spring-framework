@@ -34,56 +34,61 @@ import org.springframework.core.convert.converter.ConditionalGenericConverter;
  * Will perform an element conversion from the source component type
  * to the collection's parameterized type if necessary.
  *
+ * <p>
+ * 转换数组为集合:
+ * 转换方式:创建一个targetType的集合，然后添加数组中的每个元素到集合中。
+ * 将会执行每个元素的转算从源容器类型中转换到集合的参数类型。
+ * </p>
+ *
  * @author Keith Donald
  * @author Juergen Hoeller
  * @since 3.0
  */
 final class ArrayToCollectionConverter implements ConditionalGenericConverter {
 
-	private final ConversionService conversionService;
+    private final ConversionService conversionService;
 
 
-	public ArrayToCollectionConverter(ConversionService conversionService) {
-		this.conversionService = conversionService;
-	}
+    public ArrayToCollectionConverter(ConversionService conversionService) {
+        this.conversionService = conversionService;
+    }
 
 
-	@Override
-	public Set<ConvertiblePair> getConvertibleTypes() {
-		return Collections.singleton(new ConvertiblePair(Object[].class, Collection.class));
-	}
+    @Override
+    public Set<ConvertiblePair> getConvertibleTypes() {
+        return Collections.singleton(new ConvertiblePair(Object[].class, Collection.class));
+    }
 
-	@Override
-	public boolean matches(TypeDescriptor sourceType, TypeDescriptor targetType) {
-		return ConversionUtils.canConvertElements(
-				sourceType.getElementTypeDescriptor(), targetType.getElementTypeDescriptor(), this.conversionService);
-	}
+    @Override
+    public boolean matches(TypeDescriptor sourceType, TypeDescriptor targetType) {
+        return ConversionUtils.canConvertElements(
+                sourceType.getElementTypeDescriptor(), targetType.getElementTypeDescriptor(), this.conversionService);
+    }
 
-	@Override
-	public Object convert(Object source, TypeDescriptor sourceType, TypeDescriptor targetType) {
-		if (source == null) {
-			return null;
-		}
+    @Override
+    public Object convert(Object source, TypeDescriptor sourceType, TypeDescriptor targetType) {
+        if (source == null) {
+            return null;
+        }
 
-		int length = Array.getLength(source);
-		TypeDescriptor elementDesc = targetType.getElementTypeDescriptor();
-		Collection<Object> target = CollectionFactory.createCollection(targetType.getType(), length);
+        int length = Array.getLength(source);
+        TypeDescriptor elementDesc = targetType.getElementTypeDescriptor();
+        Collection<Object> target = CollectionFactory.createCollection(targetType.getType(), length);
 
-		if (elementDesc == null) {
-			for (int i = 0; i < length; i++) {
-				Object sourceElement = Array.get(source, i);
-				target.add(sourceElement);
-			}
-		}
-		else {
-			for (int i = 0; i < length; i++) {
-				Object sourceElement = Array.get(source, i);
-				Object targetElement = this.conversionService.convert(sourceElement,
-						sourceType.elementTypeDescriptor(sourceElement), elementDesc);
-				target.add(targetElement);
-			}
-		}
-		return target;
-	}
+        if (elementDesc == null) {
+            for (int i = 0; i < length; i++) {
+                Object sourceElement = Array.get(source, i);
+                target.add(sourceElement);
+            }
+        } else {
+            for (int i = 0; i < length; i++) {
+                Object sourceElement = Array.get(source, i);
+                Object targetElement = this.conversionService.convert(sourceElement,
+                        sourceType.elementTypeDescriptor(sourceElement), elementDesc);
+                target.add(targetElement);
+            }
+        }
+        return target;
+    }
 
 }

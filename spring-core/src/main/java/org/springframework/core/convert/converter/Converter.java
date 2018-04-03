@@ -22,20 +22,25 @@ package org.springframework.core.convert.converter;
  *
  * <p>Implementations may additionally implement {@link ConditionalConverter}.
  *
- * @author Keith Donald
- * @since 3.0
- * @see ConditionalConverter
  * @param <S> The source type
  * @param <T> The target type
+ * @author Keith Donald
+ * @see ConditionalConverter
+ * @since 3.0
  */
 public interface Converter<S, T> {
 
-	/**
-	 * Convert the source of type S to target type T.
-	 * @param source the source object to convert, which must be an instance of S
-	 * @return the converted object, which must be an instance of T
-	 * @throws IllegalArgumentException if the source could not be converted to the desired target type
-	 */
-	T convert(S source);
+    /**
+     * Convert the source of type S to target type T.
+     *
+     * <p>
+     * 将类型S 转换为目标类型T
+     * </p>
+     *
+     * @param source the source object to convert, which must be an instance of S
+     * @return the converted object, which must be an instance of T
+     * @throws IllegalArgumentException if the source could not be converted to the desired target type
+     */
+    T convert(S source);
 
 }

@@ -51,8 +51,23 @@ import org.springframework.util.StringUtils;
  * {@link #forMethodReturnType(Method) method returns} or
  * {@link #forClass(Class) classes}. Most methods on this class will themselves return
  * {@link ResolvableType}s, allowing easy navigation. For example:
+ *
+ *
+ * <p>
+ *  * 封装封装Java {@link Type}，提供从Class中获取{@link #getSuperType() supertypes},
+ *  * {@link #getInterfaces() interfaces},和 {@link #getGeneric(int...) generic parameters}的能力。</p>
+ * <p>
+ * {@code ResolveType}能够通过 {@link #forField(Field) fields},
+ * {@link #forMethodParameter(Method, int) method parameters},
+ * {@link #forMethodReturnType(Method) method returns} or
+ * {@link #forClass(Class) classes}. Most methods on this class will themselves return
+ * {@link ResolvableType}s, allowing easy navigation. For example:
+ * </p>
+ *
  * <pre class="code">
  * private HashMap&lt;Integer, List&lt;String&gt;&gt; myMap;
+ *
+ *
  *
  * public void example() {
  *     ResolvableType t = ResolvableType.forField(getClass().getDeclaredField("myMap"));
@@ -1065,7 +1080,7 @@ public final class ResolvableType implements Serializable {
      * Return a {@link ResolvableType} for the specified {@link Method} parameter with a
      * given implementation. Use this variant when the class that declares the method
      * includes generic parameter variables that are satisfied by the implementation class.
-     *
+     * <p>
      * 该方法会返回一个{@link ResolvableType}对象，该对象中通过实现的来获取指定的方法的参数.
      *
      * @param method              the source method (must not be {@code null})

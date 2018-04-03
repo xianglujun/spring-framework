@@ -30,6 +30,8 @@ import org.springframework.util.ObjectUtils;
  * Converts an array to another array. First adapts the source array to a List,
  * then delegates to {@link CollectionToArrayConverter} to perform the target
  * array conversion.
+ * <p>
+ * 转换一个数组到另外一个数组。首先将源数组转换成为一个List,然后委托给{@link CollectionToArrayConverter}执行目标数组的转换
  *
  * @author Keith Donald
  * @author Phillip Webb
@@ -37,36 +39,36 @@ import org.springframework.util.ObjectUtils;
  */
 final class ArrayToArrayConverter implements ConditionalGenericConverter {
 
-	private final CollectionToArrayConverter helperConverter;
+    private final CollectionToArrayConverter helperConverter;
 
-	private final ConversionService conversionService;
-
-
-	public ArrayToArrayConverter(ConversionService conversionService) {
-		this.helperConverter = new CollectionToArrayConverter(conversionService);
-		this.conversionService = conversionService;
-	}
+    private final ConversionService conversionService;
 
 
-	@Override
-	public Set<ConvertiblePair> getConvertibleTypes() {
-		return Collections.singleton(new ConvertiblePair(Object[].class, Object[].class));
-	}
+    public ArrayToArrayConverter(ConversionService conversionService) {
+        this.helperConverter = new CollectionToArrayConverter(conversionService);
+        this.conversionService = conversionService;
+    }
 
-	@Override
-	public boolean matches(TypeDescriptor sourceType, TypeDescriptor targetType) {
-		return this.helperConverter.matches(sourceType, targetType);
-	}
 
-	@Override
-	public Object convert(Object source, TypeDescriptor sourceType, TypeDescriptor targetType) {
-		if (this.conversionService instanceof GenericConversionService &&
-				((GenericConversionService) this.conversionService).canBypassConvert(
-						sourceType.getElementTypeDescriptor(), targetType.getElementTypeDescriptor())) {
-			return source;
-		}
-		List<Object> sourceList = Arrays.asList(ObjectUtils.toObjectArray(source));
-		return this.helperConverter.convert(sourceList, sourceType, targetType);
-	}
+    @Override
+    public Set<ConvertiblePair> getConvertibleTypes() {
+        return Collections.singleton(new ConvertiblePair(Object[].class, Object[].class));
+    }
+
+    @Override
+    public boolean matches(TypeDescriptor sourceType, TypeDescriptor targetType) {
+        return this.helperConverter.matches(sourceType, targetType);
+    }
+
+    @Override
+    public Object convert(Object source, TypeDescriptor sourceType, TypeDescriptor targetType) {
+        if (this.conversionService instanceof GenericConversionService &&
+                ((GenericConversionService) this.conversionService).canBypassConvert(
+                        sourceType.getElementTypeDescriptor(), targetType.getElementTypeDescriptor())) {
+            return source;
+        }
+        List<Object> sourceList = Arrays.asList(ObjectUtils.toObjectArray(source));
+        return this.helperConverter.convert(sourceList, sourceType, targetType);
+    }
 
 }

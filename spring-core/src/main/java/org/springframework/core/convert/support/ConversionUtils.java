@@ -29,40 +29,44 @@ import org.springframework.core.convert.converter.GenericConverter;
  */
 abstract class ConversionUtils {
 
-	public static Object invokeConverter(GenericConverter converter, Object source, TypeDescriptor sourceType,
-			TypeDescriptor targetType) {
-		try {
-			return converter.convert(source, sourceType, targetType);
-		}
-		catch (ConversionFailedException ex) {
-			throw ex;
-		}
-		catch (Exception ex) {
-			throw new ConversionFailedException(sourceType, targetType, source, ex);
-		}
-	}
+    public static Object invokeConverter(GenericConverter converter, Object source, TypeDescriptor sourceType,
+                                         TypeDescriptor targetType) {
+        try {
+            return converter.convert(source, sourceType, targetType);
+        } catch (ConversionFailedException ex) {
+            throw ex;
+        } catch (Exception ex) {
+            throw new ConversionFailedException(sourceType, targetType, source, ex);
+        }
+    }
 
-	public static boolean canConvertElements(TypeDescriptor sourceElementType, TypeDescriptor targetElementType, ConversionService conversionService) {
-		if (targetElementType == null) {
-			// yes
-			return true;
-		}
-		if (sourceElementType == null) {
-			// maybe
-			return true;
-		}
-		if (conversionService.canConvert(sourceElementType, targetElementType)) {
-			// yes
-			return true;
-		}
-		else if (sourceElementType.getType().isAssignableFrom(targetElementType.getType())) {
-			// maybe;
-			return true;
-		}
-		else {
-			// no;
-			return false;
-		}
-	}
+    /**
+     * 判断是否可以将源类型转换为指定的元素
+     *
+     * @param sourceElementType 源类型
+     * @param targetElementType 目标类型
+     * @param conversionService 转换服务
+     * @return
+     */
+    public static boolean canConvertElements(TypeDescriptor sourceElementType, TypeDescriptor targetElementType, ConversionService conversionService) {
+        if (targetElementType == null) {
+            // yes
+            return true;
+        }
+        if (sourceElementType == null) {
+            // maybe
+            return true;
+        }
+        if (conversionService.canConvert(sourceElementType, targetElementType)) {
+            // yes
+            return true;
+        } else if (sourceElementType.getType().isAssignableFrom(targetElementType.getType())) {
+            // maybe;
+            return true;
+        } else {
+            // no;
+            return false;
+        }
+    }
 
 }
