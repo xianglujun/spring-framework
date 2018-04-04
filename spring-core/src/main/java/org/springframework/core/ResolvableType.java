@@ -54,8 +54,8 @@ import org.springframework.util.StringUtils;
  *
  *
  * <p>
- *  * 封装封装Java {@link Type}，提供从Class中获取{@link #getSuperType() supertypes},
- *  * {@link #getInterfaces() interfaces},和 {@link #getGeneric(int...) generic parameters}的能力。</p>
+ * * 封装封装Java {@link Type}，提供从Class中获取{@link #getSuperType() supertypes},
+ * * {@link #getInterfaces() interfaces},和 {@link #getGeneric(int...) generic parameters}的能力。</p>
  * <p>
  * {@code ResolveType}能够通过 {@link #forField(Field) fields},
  * {@link #forMethodParameter(Method, int) method parameters},
@@ -130,10 +130,19 @@ public final class ResolvableType implements Serializable {
      */
     private final Class<?> resolved;
 
+    /**
+     * 父类
+     */
     private ResolvableType superType;
 
+    /**
+     * 当前的类型的接口信息
+     */
     private ResolvableType[] interfaces;
 
+    /**
+     * 当前的类型的泛型信息
+     */
     private ResolvableType[] generics;
 
 
@@ -147,6 +156,7 @@ public final class ResolvableType implements Serializable {
         this.typeProvider = typeProvider;
         this.variableResolver = variableResolver;
         this.componentType = componentType;
+        // 当前的值是根据设置的type列自动的确认的，可能会为null
         this.resolved = resolveClass();
     }
 
@@ -163,7 +173,7 @@ public final class ResolvableType implements Serializable {
 
 
     /**
-     * Return the underling Java {@link Type} being managed. With the exception of
+     * Return the underling(下属,走卒) Java {@link Type} being managed. With the exception of
      * the {@link #NONE} constant, this method will never return {@code null}.
      */
     public Type getType() {
@@ -219,6 +229,7 @@ public final class ResolvableType implements Serializable {
         }
 
         // Deal with array by delegating to the component type
+        // 判断当前的类型是否为数组，如果为数组，则根据类型的数组进行判断
         if (isArray()) {
             return (other.isArray() && getComponentType().isAssignableFrom(other.getComponentType()));
         }
@@ -304,6 +315,8 @@ public final class ResolvableType implements Serializable {
 
     /**
      * Return {@code true} if this type resolves to a Class that represents an array.
+     *
+     * 判断当前类型是否代表了一个数组
      *
      * @see #getComponentType()
      */
@@ -719,10 +732,25 @@ public final class ResolvableType implements Serializable {
         return (this.resolved != null ? this.resolved : fallback);
     }
 
+    /**
+     * 获取的type的class对象
+     * <p>
+     * 1. 如果当前的{@link #type}表示的是一个{@link Class}对象或者为{@code null}的情况，则返回一个{@link Class}的实例
+     * </p>
+     * <p>
+     * 2. 如果{@link #type}为一个{@link GenericArrayType}类型，返回一个数组或者{@code null}给调用者
+     * </p>
+     *
+     * @return
+     */
     private Class<?> resolveClass() {
+
+        // 判断是否为Class对象或者为Null
         if (this.type instanceof Class<?> || this.type == null) {
             return (Class<?>) this.type;
         }
+
+        // 判断是否为泛型数组类型，如果则，则创建新的数组
         if (this.type instanceof GenericArrayType) {
             Class<?> resolvedComponent = getComponentType().resolve();
             return (resolvedComponent != null ? Array.newInstance(resolvedComponent, 0).getClass() : null);
@@ -1335,6 +1363,8 @@ public final class ResolvableType implements Serializable {
 
     /**
      * Internal helper to handle bounds from {@link WildcardType}s.
+     *
+     * 内部帮助类，用于处理通配符。该对象用于处理java内部中通配符类型
      */
     private static class WildcardBounds {
 
