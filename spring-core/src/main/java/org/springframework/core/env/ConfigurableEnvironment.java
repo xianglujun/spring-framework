@@ -74,11 +74,11 @@ public interface ConfigurableEnvironment extends Environment, ConfigurableProper
 
 	/**
 	 * Specify the set of profiles active for this {@code Environment}. Profiles are
-	 * evaluated during container bootstrap to determine whether bean definitions
+	 * evaluated(评估) during container bootstrap to determine whether bean definitions
 	 * should be registered with the container.
 	 * <p>Any existing active profiles will be replaced with the given arguments; call
 	 * with zero arguments to clear the current set of active profiles. Use
-	 * {@link #addActiveProfile} to add a profile while preserving the existing set.
+	 * {@link #addActiveProfile} to add a profile while preserving(保存) the existing set.
 	 * @see #addActiveProfile
 	 * @see #setDefaultProfiles
 	 * @see org.springframework.context.annotation.Profile
@@ -112,7 +112,7 @@ public interface ConfigurableEnvironment extends Environment, ConfigurableProper
 	 * {@link MutablePropertySources#addFirst addBefore} and
 	 * {@link MutablePropertySources#addFirst addAfter} allow for fine-grained control
 	 * over property source ordering. This is useful, for example, in ensuring that
-	 * certain user-defined property sources have search precedence over default property
+	 * certain user-defined property sources have search precedence(优先) over default property
 	 * sources such as the set of system properties or the set of system environment
 	 * variables.
 	 * @see AbstractEnvironment#customizePropertySources
@@ -130,7 +130,7 @@ public interface ConfigurableEnvironment extends Environment, ConfigurableProper
 	 * <p>Calls to {@link Map#get(Object)} on the Map returned will never throw
 	 * {@link IllegalAccessException}; in cases where the SecurityManager forbids access
 	 * to a property, {@code null} will be returned and an INFO-level log message will be
-	 * issued noting the exception.
+	 * issued(发布) noting the exception.
 	 */
 	Map<String, Object> getSystemEnvironment();
 
