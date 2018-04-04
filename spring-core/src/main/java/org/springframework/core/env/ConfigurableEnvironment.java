@@ -25,12 +25,12 @@ import java.util.Map;
  * conversion service and more through the {@link ConfigurablePropertyResolver}
  * superinterface.
  *
- * <h2>Manipulating property sources</h2>
+ * <h2>Manipulating(操作) property sources</h2>
  * <p>Property sources may be removed, reordered, or replaced; and additional
  * property sources may be added using the {@link MutablePropertySources}
  * instance returned from {@link #getPropertySources()}. The following examples
  * are against the {@link StandardEnvironment} implementation of
- * {@code ConfigurableEnvironment}, but are generally applicable to any implementation,
+ * {@code ConfigurableEnvironment}, but are generally applicable(可适用的) to any implementation,
  * though particular default property sources may differ.
  *
  * <h4>Example: adding a new property source with highest search priority</h4>

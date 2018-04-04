@@ -18,11 +18,11 @@ package org.springframework.core.env;
 
 /**
  * Interface representing the environment in which the current application is running.
- * Models two key aspects of the application environment: <em>profiles</em> and
- * <em>properties</em>. Methods related to property access are exposed via the
+ * Models two key aspects of the application environment: <em>profiles(配置文件)</em> and
+ * <em>properties(内容)</em>. Methods related to property access are exposed via the
  * {@link PropertyResolver} superinterface.
  *
- * <p>A <em>profile</em> is a named, logical group of bean definitions to be registered
+ * <p>A <em>profile</em> is a named, logical(合乎逻辑的) group of bean definitions to be registered
  * with the container only if the given profile is <em>active</em>. Beans may be assigned
  * to a profile whether defined in XML or via annotations; see the spring-beans 3.1 schema
  * or the {@link org.springframework.context.annotation.Profile @Profile} annotation for
@@ -32,7 +32,7 @@ package org.springframework.core.env;
  * by default}.
  *
  * <p><em>Properties</em> play an important role in almost all applications, and may
- * originate from a variety of sources: properties files, JVM system properties, system
+ * originate(引起) from a variety of sources: properties files, JVM system properties, system
  * environment variables, JNDI, servlet context parameters, ad-hoc Properties objects,
  * Maps, and so on. The role of the environment object with relation to properties is to
  * provide the user with a convenient service interface for configuring property sources
@@ -42,7 +42,7 @@ package org.springframework.core.env;
  * org.springframework.context.EnvironmentAware EnvironmentAware} or {@code @Inject} the
  * {@code Environment} in order to query profile state or resolve properties directly.
  *
- * <p>In most cases, however, application-level beans should not need to interact with the
+ * <p>In most cases, however, application-level(应用级别) beans should not need to interact(相互作用) with the
  * {@code Environment} directly but instead may have to have {@code ${...}} property
  * values replaced by a property placeholder configurer such as
  * {@link org.springframework.context.support.PropertySourcesPlaceholderConfigurer
@@ -53,11 +53,10 @@ package org.springframework.core.env;
  * <p>Configuration of the environment object must be done through the
  * {@code ConfigurableEnvironment} interface, returned from all
  * {@code AbstractApplicationContext} subclass {@code getEnvironment()} methods. See
- * {@link ConfigurableEnvironment} Javadoc for usage examples demonstrating manipulation
- * of property sources prior to application context {@code refresh()}.
+ * {@link ConfigurableEnvironment} Javadoc for usage examples demonstrating(演示) manipulation(处理)
+ * of property sources prior(优先的) to application context {@code refresh()}.
  *
  * @author Chris Beams
- * @since 3.1
  * @see PropertyResolver
  * @see EnvironmentCapable
  * @see ConfigurableEnvironment
@@ -67,45 +66,52 @@ package org.springframework.core.env;
  * @see org.springframework.context.ConfigurableApplicationContext#getEnvironment
  * @see org.springframework.context.ConfigurableApplicationContext#setEnvironment
  * @see org.springframework.context.support.AbstractApplicationContext#createEnvironment
+ * @since 3.1
  */
 public interface Environment extends PropertyResolver {
 
-	/**
-	 * Return the set of profiles explicitly made active for this environment. Profiles
-	 * are used for creating logical groupings of bean definitions to be registered
-	 * conditionally, for example based on deployment environment.  Profiles can be
-	 * activated by setting {@linkplain AbstractEnvironment#ACTIVE_PROFILES_PROPERTY_NAME
-	 * "spring.profiles.active"} as a system property or by calling
-	 * {@link ConfigurableEnvironment#setActiveProfiles(String...)}.
-	 * <p>If no profiles have explicitly been specified as active, then any {@linkplain
-	 * #getDefaultProfiles() default profiles} will automatically be activated.
-	 * @see #getDefaultProfiles
-	 * @see ConfigurableEnvironment#setActiveProfiles
-	 * @see AbstractEnvironment#ACTIVE_PROFILES_PROPERTY_NAME
-	 */
-	String[] getActiveProfiles();
+    /**
+     * Return the set of profiles explicitly made active for this environment. Profiles
+     * are used for creating logical groupings of bean definitions to be registered
+     * conditionally, for example based on deployment environment.  Profiles can be
+     * activated by setting {@linkplain AbstractEnvironment#ACTIVE_PROFILES_PROPERTY_NAME
+     * "spring.profiles.active"} as a system property or by calling
+     * {@link ConfigurableEnvironment#setActiveProfiles(String...)}.
+     * <p>If no profiles have explicitly been specified as active, then any {@linkplain
+     * #getDefaultProfiles() default profiles} will automatically be activated.
+     *
+     * @see #getDefaultProfiles
+     * @see ConfigurableEnvironment#setActiveProfiles
+     * @see AbstractEnvironment#ACTIVE_PROFILES_PROPERTY_NAME
+     */
+    String[] getActiveProfiles();
 
-	/**
-	 * Return the set of profiles to be active by default when no active profiles have
-	 * been set explicitly.
-	 * @see #getActiveProfiles
-	 * @see ConfigurableEnvironment#setDefaultProfiles
-	 * @see AbstractEnvironment#DEFAULT_PROFILES_PROPERTY_NAME
-	 */
-	String[] getDefaultProfiles();
+    /**
+     * Return the set of profiles to be active by default when no active profiles have
+     * been set explicitly.
+     *
+     * @see #getActiveProfiles
+     * @see ConfigurableEnvironment#setDefaultProfiles
+     * @see AbstractEnvironment#DEFAULT_PROFILES_PROPERTY_NAME
+     */
+    String[] getDefaultProfiles();
 
-	/**
-	 * Return whether one or more of the given profiles is active or, in the case of no
-	 * explicit active profiles, whether one or more of the given profiles is included in
-	 * the set of default profiles. If a profile begins with '!' the logic is inverted,
-	 * i.e. the method will return true if the given profile is <em>not</em> active.
-	 * For example, <pre class="code">env.acceptsProfiles("p1", "!p2")</pre> will
-	 * return {@code true} if profile 'p1' is active or 'p2' is not active.
-	 * @throws IllegalArgumentException if called with zero arguments
-	 * or if any profile is {@code null}, empty or whitespace-only
-	 * @see #getActiveProfiles
-	 * @see #getDefaultProfiles
-	 */
-	boolean acceptsProfiles(String... profiles);
+    /**
+     * Return whether one or more of the given profiles is active or, in the case of no
+     * explicit active profiles, whether one or more of the given profiles is included in
+     * the set of default profiles. If a profile begins with '!' the logic is inverted(倒转的),
+     * i.e. the method will return true if the given profile is <em>not</em> active.
+     * For example, <pre class="code">env.acceptsProfiles("p1", "!p2")</pre> will
+     * return {@code true} if profile 'p1' is active or 'p2' is not active.
+     *
+     * 判断配置文件是否处于激活状态，或者在明确指定的激活配置文件之中或者在默认的配置文件之中个，其中可以通过{@code !}进行逻辑的倒转，
+     * <pre class="code">env.acceptsProfiles("ps", "!p2")</pre>如果返回true就代表，p1的配置文件处于激活状态，p2处于未激活状态
+     *
+     * @throws IllegalArgumentException if called with zero arguments
+     *                                  or if any profile is {@code null}, empty or whitespace-only
+     * @see #getActiveProfiles
+     * @see #getDefaultProfiles
+     */
+    boolean acceptsProfiles(String... profiles);
 
 }
