@@ -26,8 +26,8 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 /**
- * Utility class for working with Strings that have placeholder values in them. A placeholder takes the form
- * {@code ${name}}. Using {@code PropertyPlaceholderHelper} these placeholders can be substituted for
+ * Utility(工具) class for working with Strings that have placeholder values in them. A placeholder takes the form
+ * {@code ${name}}. Using {@code PropertyPlaceholderHelper} these placeholders can be substituted(取代的) for
  * user-supplied values. <p> Values for substitution can be supplied using a {@link Properties} instance or
  * using a {@link PlaceholderResolver}.
  *
