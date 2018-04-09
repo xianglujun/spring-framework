@@ -22,15 +22,15 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.util.Assert;
 
 /**
- * A {@link PropertySource} implementation capable of interrogating its
- * underlying source object to enumerate all possible property name/value
+ * A {@link PropertySource} implementation capable(能干的) of interrogating(询问) its
+ * underlying source object to enumerate(列举,枚举) all possible property name/value
  * pairs. Exposes the {@link #getPropertyNames()} method to allow callers
- * to introspect available properties without having to access the underlying
- * source object. This also facilitates a more efficient implementation of
+ * to introspect(内省) available properties without having to access the underlying
+ * source object. This also facilitates(促进) a more efficient implementation of
  * {@link #containsProperty(String)}, in that it can call {@link #getPropertyNames()}
  * and iterate through the returned array rather than attempting a call to
  * {@link #getProperty(String)} which may be more expensive. Implementations may
- * consider caching the result of {@link #getPropertyNames()} to fully exploit this
+ * consider caching the result of {@link #getPropertyNames()} to fully exploit(开发) this
  * performance opportunity.
  *
  * Most framework-provided {@code PropertySource} implementations are enumerable;

@@ -29,7 +29,7 @@ import org.springframework.util.StringUtils;
  * {@code OptionSet} in the case of {@link JOptCommandLinePropertySource}.
  *
  * <h3>Purpose and General Usage</h3>
- * For use in standalone Spring-based applications, i.e. those that are bootstrapped via
+ * For use in standalone(单独的) Spring-based applications, i.e. those that are bootstrapped via
  * a traditional {@code main} method accepting a {@code String[]} of arguments from the
  * command line. In many cases, processing command-line arguments directly within the
  * {@code main} method may be sufficient, but in other cases, it may be desirable to
@@ -109,7 +109,7 @@ import org.springframework.util.StringUtils;
  *
  * Note that the 'o2' option has no argument, but {@code getProperty("o2")} resolves to
  * empty string ({@code ""}) as opposed to {@code null}, while {@code getProperty("o3")}
- * resolves to {@code null} because it was not specified. This behavior is consistent with
+ * resolves to {@code null} because it was not specified(指定,详细说明). This behavior is consistent with
  * the general contract to be followed by all {@code PropertySource} implementations.
  *
  * <p>Note also that while "--" was used in the examples above to denote an option
@@ -127,7 +127,7 @@ import org.springframework.util.StringUtils;
  * comma-delimited string containing all of the arguments. This approach ensures a simple
  * and consistent return type (String) for all properties from a {@code
  * CommandLinePropertySource} and at the same time lends itself to conversion when used
- * in conjunction with the Spring {@link Environment} and its built-in {@code
+ * in conjunction(结合) with the Spring {@link Environment} and its built-in {@code
  * ConversionService}. Consider the following example:
  * <pre class="code">
  * --o1=v1 --o2=v2 /path/to/file1 /path/to/file2</pre>

@@ -209,7 +209,7 @@ public abstract class AbstractEnvironment implements ConfigurableEnvironment {
      * default values of instance variables, leave this method as a no-op and perform
      * property source manipulation and instance variable access directly within the
      * subclass constructor. Note that <em>assigning</em> values to instance variables is
-     * not problematic; it is only attempting to read default values that must be avoided.
+     * not problematic(有问题的); it is only attempting to read default values that must be avoided.
      *
      * @see MutablePropertySources
      * @see PropertySourcesPropertyResolver
@@ -421,6 +421,7 @@ public abstract class AbstractEnvironment implements ConfigurableEnvironment {
     protected boolean suppressGetenvAccess() {
         return SpringProperties.getFlag(IGNORE_GETENV_PROPERTY_NAME);
     }
+
 
     @Override
     @SuppressWarnings("unchecked")
