@@ -55,7 +55,7 @@ public class ClassPathResource extends AbstractFileResolvingResource {
 	 * methods will not accept it.
 	 * <p>The thread context class loader will be used for
 	 * loading the resource.
-	 * @param path the absolute path within the class path
+	 * @param path the absolute path(绝对路径) within the class path
 	 * @see java.lang.ClassLoader#getResourceAsStream(String)
 	 * @see org.springframework.util.ClassUtils#getDefaultClassLoader()
 	 */

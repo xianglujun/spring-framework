@@ -17,11 +17,11 @@
 package org.springframework.core.io;
 
 /**
- * Extended interface for a resource that is loaded from an enclosing
+ * Extended interface for a resource that is loaded from an enclosing(封闭，闭合)
  * 'context', e.g. from a {@link javax.servlet.ServletContext} or a
  * {@link javax.portlet.PortletContext} but also from plain classpath paths
  * or relative file system paths (specified without an explicit prefix,
- * hence applying relative to the local {@link ResourceLoader}'s context).
+ * hence(因此) applying relative to the local {@link ResourceLoader}'s context).
  *
  * @author Juergen Hoeller
  * @since 2.5

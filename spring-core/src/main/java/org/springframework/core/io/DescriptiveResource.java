@@ -27,60 +27,65 @@ import java.io.InputStream;
  * <p>To be used as placeholder if a {@code Resource} argument is
  * expected by an API but not necessarily used for actual reading.
  *
+ * <p>
+ *     该类为{@link Resource}的一个实现,用于持有资源的描述，但是不指向任何可读的资源。
+ *     该类可以用于一个展位符并且不需要提供实际读的功能。
+ * </p>
  * @author Juergen Hoeller
  * @since 1.2.6
  */
 public class DescriptiveResource extends AbstractResource {
 
-	private final String description;
+    private final String description;
 
 
-	/**
-	 * Create a new DescriptiveResource.
-	 * @param description the resource description
-	 */
-	public DescriptiveResource(String description) {
-		this.description = (description != null ? description : "");
-	}
+    /**
+     * Create a new DescriptiveResource.
+     *
+     * @param description the resource description
+     */
+    public DescriptiveResource(String description) {
+        this.description = (description != null ? description : "");
+    }
 
 
-	@Override
-	public boolean exists() {
-		return false;
-	}
+    @Override
+    public boolean exists() {
+        return false;
+    }
 
-	@Override
-	public boolean isReadable() {
-		return false;
-	}
+    @Override
+    public boolean isReadable() {
+        return false;
+    }
 
-	@Override
-	public InputStream getInputStream() throws IOException {
-		throw new FileNotFoundException(
-				getDescription() + " cannot be opened because it does not point to a readable resource");
-	}
+    @Override
+    public InputStream getInputStream() throws IOException {
+        throw new FileNotFoundException(
+                getDescription() + " cannot be opened because it does not point to a readable resource");
+    }
 
-	@Override
-	public String getDescription() {
-		return this.description;
-	}
+    @Override
+    public String getDescription() {
+        return this.description;
+    }
 
 
-	/**
-	 * This implementation compares the underlying description String.
-	 */
-	@Override
-	public boolean equals(Object obj) {
-		return (obj == this ||
-			(obj instanceof DescriptiveResource && ((DescriptiveResource) obj).description.equals(this.description)));
-	}
+    /**
+     * This implementation compares the underlying description String.
+     */
+    @Override
+    public boolean equals(Object obj) {
+        return (obj == this ||
+                (obj instanceof DescriptiveResource && ((DescriptiveResource) obj).description.equals(this.description)));
+    }
 
-	/**
-	 * This implementation returns the hash code of the underlying description String.
-	 */
-	@Override
-	public int hashCode() {
-		return this.description.hashCode();
-	}
+    /**
+     * This implementation returns the hash code of the underlying description String.
+     */
+    @Override
+    public int hashCode() {
+        return this.description.hashCode();
+    }
 
 }

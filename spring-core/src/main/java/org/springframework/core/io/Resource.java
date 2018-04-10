@@ -59,7 +59,7 @@ public interface Resource extends InputStreamSource {
 	 * e.g. via {@link #getInputStream()} or {@link #getFile()}.
 	 * <p>Will be {@code true} for typical resource descriptors;
 	 * note that actual content reading may still fail when attempted.
-	 * However, a value of {@code false} is a definitive indication
+	 * However, a value of {@code false} is a definitive(决定性的) indication
 	 * that the resource content cannot be read.
 	 * @see #getInputStream()
 	 */
@@ -68,7 +68,7 @@ public interface Resource extends InputStreamSource {
 	/**
 	 * Return whether this resource represents a handle with an open
 	 * stream. If true, the InputStream cannot be read multiple times,
-	 * and must be read and closed to avoid resource leaks.
+	 * and must be read and closed to avoid resource leaks(泄漏).
 	 * <p>Will be {@code false} for typical resource descriptors.
 	 */
 	boolean isOpen();
