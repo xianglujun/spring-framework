@@ -52,7 +52,7 @@ public class UrlResource extends AbstractFileResolvingResource {
 	private final URL url;
 
 	/**
-	 * Cleaned URL (with normalized path), used for comparisons.
+	 * Cleaned URL (with normalized(标准化的) path), used for comparisons.
 	 */
 	private final URL cleanedUrl;
 
@@ -97,7 +97,7 @@ public class UrlResource extends AbstractFileResolvingResource {
 	/**
 	 * Create a new UrlResource based on a URI specification.
 	 * <p>The given parts will automatically get encoded if necessary.
-	 * @param protocol the URL protocol to use (e.g. "jar" or "file" - without colon);
+	 * @param protocol the URL protocol to use (e.g. "jar" or "file" - without colon(冒号));
 	 * also known as "scheme"
 	 * @param location the location (e.g. the file path within that protocol);
 	 * also known as "scheme-specific part"

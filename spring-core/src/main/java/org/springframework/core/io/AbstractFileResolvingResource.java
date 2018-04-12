@@ -40,7 +40,7 @@ public abstract class AbstractFileResolvingResource extends AbstractResource {
 
 	/**
 	 * This implementation returns a File reference for the underlying class path
-	 * resource, provided that it refers to a file in the file system.
+	 * resource, provided that it refers to(适用于) a file in the file system.
 	 * @see org.springframework.util.ResourceUtils#getFile(java.net.URL, String)
 	 */
 	@Override
@@ -206,7 +206,7 @@ public abstract class AbstractFileResolvingResource extends AbstractResource {
 
 
 	/**
-	 * Inner delegate class, avoiding a hard JBoss VFS API dependency at runtime.
+	 * Inner delegate(委派) class, avoiding a hard JBoss VFS API dependency at runtime.
 	 */
 	private static class VfsResourceDelegate {
 

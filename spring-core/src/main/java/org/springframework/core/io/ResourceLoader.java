@@ -24,7 +24,7 @@ import org.springframework.util.ResourceUtils;
  * is required to provide this functionality, plus extended
  * {@link org.springframework.core.io.support.ResourcePatternResolver} support.
  *
- * <p>{@link DefaultResourceLoader} is a standalone implementation that is
+ * <p>{@link DefaultResourceLoader} is a standalone(独立) implementation that is
  * usable outside an ApplicationContext, also used by {@link ResourceEditor}.
  *
  * <p>Bean properties of type Resource and Resource array can be populated
@@ -55,7 +55,7 @@ public interface ResourceLoader {
 	 * (This will be implementation-specific, typically provided by an
 	 * ApplicationContext implementation.)
 	 * </ul>
-	 * <p>Note that a Resource handle does not imply an existing resource;
+	 * <p>Note that a Resource handle does not imply(意味着) an existing resource;
 	 * you need to invoke {@link Resource#exists} to check for existence.
 	 * @param location the resource location
 	 * @return a corresponding Resource handle
