@@ -124,7 +124,7 @@ public class SimpleAsyncTaskExecutor extends CustomizableThreadCreator implement
 	}
 
 	/**
-	 * Return the maximum number of parallel accesses allowed.
+	 * Return the maximum number of parallel(平行的;与...类似的) accesses allowed.
 	 */
 	public final int getConcurrencyLimit() {
 		return this.concurrencyThrottle.getConcurrencyLimit();
