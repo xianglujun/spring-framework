@@ -11,3 +11,6 @@ org.springframework.spring-parent/.classpath
 org.springframework.spring-parent/.project
 org.springframework.test/test-output/
 spring-build/lib/docbook
+.gradle
+.idea
+gradle
