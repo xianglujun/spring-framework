@@ -315,7 +315,10 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
 			logger.info("Loading XML bean definitions from " + encodedResource.getResource());
 		}
 
+		// 该处使用到了一个ThreadLocal, 主要目的是为了什么?
 		Set<EncodedResource> currentResources = this.resourcesCurrentlyBeingLoaded.get();
+
+		// 如果与当前线程没有绑定Resource,则创建一个新的列表，并与当前线程进行绑定
 		if (currentResources == null) {
 			currentResources = new HashSet<EncodedResource>(4);
 			this.resourcesCurrentlyBeingLoaded.set(currentResources);
