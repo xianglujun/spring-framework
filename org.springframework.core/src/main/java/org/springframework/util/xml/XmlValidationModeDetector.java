@@ -97,6 +97,8 @@ public class XmlValidationModeDetector {
 				if (this.inComment || !StringUtils.hasText(content)) {
 					continue;
 				}
+
+				// 判断是否包含了 DOCTYPE关键字，如果是包含了关键字，则需要验证
 				if (hasDoctype(content)) {
 					isDtdValidated = true;
 					break;

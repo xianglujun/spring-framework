@@ -37,10 +37,17 @@ import org.springframework.util.StringValueResolver;
  */
 public class SimpleAliasRegistry implements AliasRegistry {
 
-	/** Map from alias to canonical name */
+	/** Map from alias to canonical name
+	 *  哇塞，你看到没得，在注册alias的时候，居然用的是CurrencyHashMap耶。哈哈哈~~~~~
+	 * */
 	private final Map<String, String> aliasMap = new ConcurrentHashMap<String, String>();
 
 
+	/**
+	 * 注册别名信息
+	 * @param name the canonical name
+	 * @param alias the alias to be registered
+	 */
 	public void registerAlias(String name, String alias) {
 		Assert.hasText(name, "'name' must not be empty");
 		Assert.hasText(alias, "'alias' must not be empty");
@@ -48,6 +55,7 @@ public class SimpleAliasRegistry implements AliasRegistry {
 			this.aliasMap.remove(alias);
 		}
 		else {
+			// 判断别名是否能够被覆盖，如果不能被覆盖，那你惨了, 将会抛出异常哦
 			if (!allowAliasOverriding()) {
 				String registeredName = this.aliasMap.get(alias);
 				if (registeredName != null && !registeredName.equals(name)) {

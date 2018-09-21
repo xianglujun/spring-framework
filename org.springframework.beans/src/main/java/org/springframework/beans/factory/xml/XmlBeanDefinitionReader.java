@@ -323,17 +323,24 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
 			currentResources = new HashSet<EncodedResource>(4);
 			this.resourcesCurrentlyBeingLoaded.set(currentResources);
 		}
+
+		// 该处是检测同一个资源，是否被重复加载, 因为Set具有去重功能，因此该处
+		// 可以通过判断是否添加成功判断是否为重复
 		if (!currentResources.add(encodedResource)) {
 			throw new BeanDefinitionStoreException(
 					"Detected cyclic loading of " + encodedResource + " - check your import definitions!");
 		}
+
 		try {
+			// 获取XML的流对象
 			InputStream inputStream = encodedResource.getResource().getInputStream();
 			try {
 				InputSource inputSource = new InputSource(inputStream);
 				if (encodedResource.getEncoding() != null) {
 					inputSource.setEncoding(encodedResource.getEncoding());
 				}
+
+				// 从输入流中加载BeanDefinition对象
 				return doLoadBeanDefinitions(inputSource, encodedResource.getResource());
 			}
 			finally {
@@ -493,6 +500,9 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
 		// Read document based on new BeanDefinitionDocumentReader SPI.
 		BeanDefinitionDocumentReader documentReader = createBeanDefinitionDocumentReader();
 		int countBefore = getRegistry().getBeanDefinitionCount();
+
+		// 通过该处可以看到，真正解析XML并获取BeanDefinition定义，是通过DefaultBeanDefinitionDocumentReader
+		// 来完成的, 具体通过调用registerBeanDefinitions来执行操作
 		documentReader.registerBeanDefinitions(doc, createReaderContext(resource));
 		return getRegistry().getBeanDefinitionCount() - countBefore;
 	}
@@ -501,6 +511,8 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
 	 * Create the {@link BeanDefinitionDocumentReader} to use for actually
 	 * reading bean definitions from an XML document.
 	 * <p>The default implementation instantiates the specified "documentReaderClass".
+	 *
+	 * 该处我觉得有点奇葩, 威慑么不直接new一个对象呢，非要通过class反射区去创建创建对象???
 	 * @see #setDocumentReaderClass
 	 */
 	@SuppressWarnings("unchecked")
@@ -510,6 +522,8 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
 
 	/**
 	 * Create the {@link XmlReaderContext} to pass over to the document reader.
+	 *
+	 * 创建一个XmlReaderContext对象，目的是为了忽略document reader
 	 */
 	protected XmlReaderContext createReaderContext(Resource resource) {
 		if (this.namespaceHandlerResolver == null) {
