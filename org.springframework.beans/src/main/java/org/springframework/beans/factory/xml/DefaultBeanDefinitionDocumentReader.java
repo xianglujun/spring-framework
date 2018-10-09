@@ -304,20 +304,22 @@ public class DefaultBeanDefinitionDocumentReader implements BeanDefinitionDocume
 	protected void processBeanDefinition(Element ele, BeanDefinitionParserDelegate delegate) {
 
 		// 此处可以看到哦，实际上BeanDefinitionParseDelegate实际上会降对BeanDefinition的引用
-		// 交由BeanDefinitionHolder来进行处理。
+		// 交由BeanDefinitionHolder来进行处理。在BeanDefinitionHolder中，实际只是包含了
+		// BeanDefinition还有一些必要的beanName, aliases的相关参数
 		BeanDefinitionHolder bdHolder = delegate.parseBeanDefinitionElement(ele);
 
 		if (bdHolder != null) {
 			bdHolder = delegate.decorateBeanDefinitionIfRequired(ele, bdHolder);
 			try {
 				// Register the final decorated instance.
+				// 最终将BeanDefinition注册到BeanFactory中，是通过工具类去实现的
 				BeanDefinitionReaderUtils.registerBeanDefinition(bdHolder, getReaderContext().getRegistry());
 			}
 			catch (BeanDefinitionStoreException ex) {
 				getReaderContext().error("Failed to register bean definition with name '" +
 						bdHolder.getBeanName() + "'", ele, ex);
 			}
-			// Send registration event.
+			// Send registration event. 该处主要是发送beanDefinition注册成功的时间消息
 			getReaderContext().fireComponentRegistered(new BeanComponentDefinition(bdHolder));
 		}
 	}

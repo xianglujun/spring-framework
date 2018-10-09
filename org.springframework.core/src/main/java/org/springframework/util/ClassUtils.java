@@ -148,6 +148,9 @@ public abstract class ClassUtils {
 	 * for example, for class path resource loading (but not necessarily for
 	 * <code>Class.forName</code>, which accepts a <code>null</code> ClassLoader
 	 * reference as well).
+	 * 该方法主要获取类加载器, 获取类加载器的时候, 主要获取当前线程的容器类加载器, 如果当前的
+	 * 线程类加载器获取失败, 则默认使用当前类的加载器。
+	 * 线程类加载器获取失败, 则默认使用当前类的加载器。
 	 * @return the default ClassLoader (never <code>null</code>)
 	 * @see java.lang.Thread#getContextClassLoader()
 	 */

@@ -76,7 +76,8 @@ public class BeanDefinitionReaderUtils {
 
 	/**
 	 * Generate a bean name for the given bean definition, unique within the
-	 * given bean factory.
+	 * given bean factory(该方法的主要目的在于, 为{@link BeanDefinition}生成一个beanName,该bean name
+	 * 必须是在factory中是唯一存在的).
 	 * @param definition the bean definition to generate a bean name for
 	 * @param registry the bean factory that the definition is going to be
 	 * registered with (to check for existing bean names)
@@ -91,15 +92,20 @@ public class BeanDefinitionReaderUtils {
 			BeanDefinition definition, BeanDefinitionRegistry registry, boolean isInnerBean)
 			throws BeanDefinitionStoreException {
 
+		// 获取类的全限定名称
 		String generatedBeanName = definition.getBeanClassName();
+		// 如果类名不存在, 对应于<Bean class="">中的class属性
 		if (generatedBeanName == null) {
+			// 则获取父类的名称, 对应于<bean parent="">中的parent属性
 			if (definition.getParentName() != null) {
 				generatedBeanName = definition.getParentName() + "$child";
 			}
 			else if (definition.getFactoryBeanName() != null) {
+				// 如果父类的名称不存在, 则获取factoryBeanName的名称, 这个属性在什么地方设置????
 				generatedBeanName = definition.getFactoryBeanName() + "$created";
 			}
 		}
+
 		if (!StringUtils.hasText(generatedBeanName)) {
 			throw new BeanDefinitionStoreException("Unnamed bean definition specifies neither " +
 					"'class' nor 'parent' nor 'factory-bean' - can't generate bean name");
@@ -108,12 +114,17 @@ public class BeanDefinitionReaderUtils {
 		String id = generatedBeanName;
 		if (isInnerBean) {
 			// Inner bean: generate identity hashcode suffix.
+			// 对于是内部的bean的情况则需要在beanName之后加入一个hashcohe的16进制的字符串，例如: bean#fdfdfd
 			id = generatedBeanName + GENERATED_BEAN_NAME_SEPARATOR + ObjectUtils.getIdentityHexString(definition);
 		}
 		else {
 			// Top-level bean: use plain class name.
 			// Increase counter until the id is unique.
 			int counter = -1;
+			// 然而, 对于是顶层的BeanDefinition来讲的话,则需要判断registry中是否已经注册了
+			// 当前的beanName, 如果已经注册，则需要在已注册的bean之后，加入#counter的字样
+			// 例如: hello#2
+			// 我认为，为什么需要这么处理，是因为同一个类型的class可能会被定义为多个bean, 这个时候就需要特殊处理
 			while (counter == -1 || registry.containsBeanDefinition(id)) {
 				counter++;
 				id = generatedBeanName + GENERATED_BEAN_NAME_SEPARATOR + counter;
@@ -150,6 +161,7 @@ public class BeanDefinitionReaderUtils {
 
 		// Register bean definition under primary name.
 		String beanName = definitionHolder.getBeanName();
+		// 将解析到的BeanDefinition注册到容器之中
 		registry.registerBeanDefinition(beanName, definitionHolder.getBeanDefinition());
 
 		// Register aliases for bean name, if any.

@@ -75,6 +75,8 @@ public abstract class AbstractBeanDefinitionReader implements BeanDefinitionRead
 			this.resourceLoader = (ResourceLoader) this.registry;
 		}
 		else {
+			// 这里, 如果没有直接设置ResourceLoader或者继承ResourceLoader, 这时
+			// 局需要设置一个默认的ResourceLoader实现
 			this.resourceLoader = new PathMatchingResourcePatternResolver();
 		}
 	}

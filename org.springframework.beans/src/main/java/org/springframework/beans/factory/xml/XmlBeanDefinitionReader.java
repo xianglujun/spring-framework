@@ -107,6 +107,9 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
 
 	private ProblemReporter problemReporter = new FailFastProblemReporter();
 
+	/**
+	 * 默认加载XML文件的事件监听器
+	 */
 	private ReaderEventListener eventListener = new EmptyReaderEventListener();
 
 	private SourceExtractor sourceExtractor = new NullSourceExtractor();

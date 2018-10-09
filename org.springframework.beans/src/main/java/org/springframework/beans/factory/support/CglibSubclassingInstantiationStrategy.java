@@ -106,6 +106,7 @@ public class CglibSubclassingInstantiationStrategy extends SimpleInstantiationSt
 		 * @return new instance of the dynamically generated class
 		 */
 		public Object instantiate(Constructor ctor, Object[] args) {
+			// 这里已经在使用CGLIB的类了, 通过Enhancer.create()方法来进行创建
 			Enhancer enhancer = new Enhancer();
 			enhancer.setSuperclass(this.beanDefinition.getBeanClass());
 			enhancer.setCallbackFilter(new CallbackFilterImpl());

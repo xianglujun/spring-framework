@@ -613,6 +613,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 		synchronized (this.beanDefinitionMap) {
 			Object oldBeanDefinition = this.beanDefinitionMap.get(beanName);
 			if (oldBeanDefinition != null) {
+				// 是否允许Bean名称的重复, 如果不允许相同名称的bean被覆盖，则会抛出错误。
 				if (!this.allowBeanDefinitionOverriding) {
 					throw new BeanDefinitionStoreException(beanDefinition.getResourceDescription(), beanName,
 							"Cannot register bean definition [" + beanDefinition + "] for bean '" + beanName +
@@ -626,6 +627,8 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 				}
 			}
 			else {
+				// 这是正常的Bean注册流程, 把bean的名称放入到beanDefinitionNames中去, 把beanName作为Map的key
+				// 吧beanDefinition作为value放入到Ioc容器持有的beanDefinitionMap中去
 				this.beanDefinitionNames.add(beanName);
 				this.frozenBeanDefinitionNames = null;
 			}
@@ -649,6 +652,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 			this.beanDefinitionNames.remove(beanName);
 			this.frozenBeanDefinitionNames = null;
 
+			// 重置BeanDefinition相关信息
 			resetBeanDefinition(beanName);
 		}
 	}

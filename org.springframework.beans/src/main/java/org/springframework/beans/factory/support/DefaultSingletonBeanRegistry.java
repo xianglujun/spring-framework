@@ -162,6 +162,11 @@ public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements
 		}
 	}
 
+	/**
+	 * 根据beanName获取并实例化对应的bean实例
+	 * @param beanName the name of the bean to look for
+	 * @return
+	 */
 	public Object getSingleton(String beanName) {
 		return getSingleton(beanName, true);
 	}
@@ -175,11 +180,17 @@ public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements
 	 * @return the registered singleton object, or <code>null</code> if none found
 	 */
 	protected Object getSingleton(String beanName, boolean allowEarlyReference) {
+		// 这里主要是维护了一个ConcurrencyHashMap, 所有的单例实例都是放在了singletonObjects之中
 		Object singletonObject = this.singletonObjects.get(beanName);
+		// 该处就代表, 对应的singletonObject是没有被创建
 		if (singletonObject == null) {
 			synchronized (this.singletonObjects) {
+				// 查看早起的单例模式对象中否包含了对象
 				singletonObject = this.earlySingletonObjects.get(beanName);
+				// 在earlySingtonObjects中依然没有找到对应的对象, 这个时候根据allowEarlyReference
+				// 判断是否需要创建对象
 				if (singletonObject == null && allowEarlyReference) {
+					// 这里回去获取ObjectFactory的对象, 这个对象是用来做什么的???? 所有的bean都有ObjectFactory对象吗?
 					ObjectFactory singletonFactory = this.singletonFactories.get(beanName);
 					if (singletonFactory != null) {
 						singletonObject = singletonFactory.getObject();
@@ -205,6 +216,7 @@ public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements
 		synchronized (this.singletonObjects) {
 			Object singletonObject = this.singletonObjects.get(beanName);
 			if (singletonObject == null) {
+				// 判断当前是否正在摧毁Singleton的实例
 				if (this.singletonsCurrentlyInDestruction) {
 					throw new BeanCreationNotAllowedException(beanName,
 							"Singleton bean creation not allowed while the singletons of this factory are in destruction " +
@@ -213,6 +225,8 @@ public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements
 				if (logger.isDebugEnabled()) {
 					logger.debug("Creating shared instance of singleton bean '" + beanName + "'");
 				}
+				// 在创建singleton bean的之前操作, 该操作主要是将正在创建的bean的名称放入到singletonsCurrentlyInCreation
+				// 之中，便于其他县城的使用
 				beforeSingletonCreation(beanName);
 				boolean recordSuppressedExceptions = (this.suppressedExceptions == null);
 				if (recordSuppressedExceptions) {
@@ -233,8 +247,10 @@ public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements
 					if (recordSuppressedExceptions) {
 						this.suppressedExceptions = null;
 					}
+					// 当bean创建完成之后, 则将当前的bean从正在创建的列表中移除
 					afterSingletonCreation(beanName);
 				}
+				// 将当前的单例对象, 和beanName进行绑定
 				addSingleton(beanName, singletonObject);
 			}
 			return (singletonObject != NULL_OBJECT ? singletonObject : null);
@@ -289,6 +305,9 @@ public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements
 	/**
 	 * Callback before singleton creation.
 	 * <p>Default implementation register the singleton as currently in creation.
+	 *
+	 *
+	 *
 	 * @param beanName the name of the singleton about to be created
 	 * @see #isSingletonCurrentlyInCreation
 	 */
@@ -359,6 +378,9 @@ public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements
 	/**
 	 * Register a dependent bean for the given bean,
 	 * to be destroyed before the given bean is destroyed.
+	 *
+	 * 当前正是注册一个依赖的集合, 我觉得用于判断bean之间的依赖
+	 *
 	 * @param beanName the name of the bean
 	 * @param dependentBeanName the name of the dependent bean
 	 */

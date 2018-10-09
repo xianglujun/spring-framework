@@ -382,6 +382,11 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 		this.beanClass = beanClassName;
 	}
 
+	/**
+	 * 获取当前的BeanDefinition代表的Class对象, 内部存储的Class对象，可能为Class对象, 可能仅仅是一个
+	 * 类的全限定名称
+	 * @return {@link String} 当前BeanDefinition代表的类型全限定名称
+	 */
 	public String getBeanClassName() {
 		Object beanClassObject = this.beanClass;
 		if (beanClassObject instanceof Class) {

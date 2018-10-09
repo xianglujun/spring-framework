@@ -395,9 +395,11 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	public void refresh() throws BeansException, IllegalStateException {
 		synchronized (this.startupShutdownMonitor) {
 			// Prepare this context for refreshing.
+			// 刷新前的一些准备，准备主要包括容器的启动时间,以及更改当前的容器状态为激活状态
 			prepareRefresh();
 
 			// Tell the subclass to refresh the internal bean factory.
+			// 这里实在子类中启动refreshBeanFactory()的地方。
 			ConfigurableListableBeanFactory beanFactory = obtainFreshBeanFactory();
 
 			// Prepare the bean factory for use in this context.
@@ -405,30 +407,39 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 
 			try {
 				// Allows post-processing of the bean factory in context subclasses.
+				// 设置BeanFactory的后置处理
 				postProcessBeanFactory(beanFactory);
 
 				// Invoke factory processors registered as beans in the context.
+				// 设置BeanFactory的后置处理器, 这些后置处理器, 实在Bean定义的过程中向容器注册的
 				invokeBeanFactoryPostProcessors(beanFactory);
 
 				// Register bean processors that intercept bean creation.
+				// 注册Bean的后处理器, 在Bean的创建过程中调用
 				registerBeanPostProcessors(beanFactory);
 
 				// Initialize message source for this context.
+				// 队上下问中的消息源进行初始化
 				initMessageSource();
 
 				// Initialize event multicaster for this context.
+				// 初始化上下文中的事件机制
 				initApplicationEventMulticaster();
 
 				// Initialize other special beans in specific context subclasses.
+				// 初始化其他特殊的Bean
 				onRefresh();
 
 				// Check for listener beans and register them.
+				// 检查监听Bean, 并将这些Bean向容器注册
 				registerListeners();
 
 				// Instantiate all remaining (non-lazy-init) singletons.
+				// 初始化所有的(non-lazy-init)单件
 				finishBeanFactoryInitialization(beanFactory);
 
 				// Last step: publish corresponding event.
+				// 发布容器事件, 结束refresh过程
 				finishRefresh();
 			}
 
@@ -476,6 +487,8 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	 */
 	protected ConfigurableListableBeanFactory obtainFreshBeanFactory() {
 		refreshBeanFactory();
+
+		// 获取创建好的BeanFactory信息
 		ConfigurableListableBeanFactory beanFactory = getBeanFactory();
 		if (logger.isDebugEnabled()) {
 			logger.debug("Bean factory for " + getDisplayName() + ": " + beanFactory);

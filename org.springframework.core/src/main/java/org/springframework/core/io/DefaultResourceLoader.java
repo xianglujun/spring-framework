@@ -86,6 +86,7 @@ public class DefaultResourceLoader implements ResourceLoader {
 
 	public Resource getResource(String location) {
 		Assert.notNull(location, "Location must not be null");
+		// 如果是以classpath:开头, 则使用ClassPathResource进行处理
 		if (location.startsWith(CLASSPATH_URL_PREFIX)) {
 			return new ClassPathResource(location.substring(CLASSPATH_URL_PREFIX.length()), getClassLoader());
 		}
