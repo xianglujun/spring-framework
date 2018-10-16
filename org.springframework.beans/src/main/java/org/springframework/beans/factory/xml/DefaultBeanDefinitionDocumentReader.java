@@ -59,16 +59,30 @@ public class DefaultBeanDefinitionDocumentReader implements BeanDefinitionDocume
 
 	public static final String BEAN_ELEMENT = BeanDefinitionParserDelegate.BEAN_ELEMENT;
 
+	/**
+	 * 别名元素节点
+	 */
 	public static final String ALIAS_ELEMENT = "alias";
 
+	/**
+	 * name 元素节点名称
+	 */
 	public static final String NAME_ATTRIBUTE = "name";
 
+	/**
+	 * alias属性定义
+	 */
 	public static final String ALIAS_ATTRIBUTE = "alias";
 
+	/**
+	 * import节点
+	 */
 	public static final String IMPORT_ELEMENT = "import";
 
+	/**
+	 * resource属性
+	 */
 	public static final String RESOURCE_ATTRIBUTE = "resource";
-
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
@@ -101,6 +115,12 @@ public class DefaultBeanDefinitionDocumentReader implements BeanDefinitionDocume
 		postProcessXml(root);
 	}
 
+	/**
+	 * 创建{@link BeanDefinitionParserDelegate}, 这里是最主要解析并获取BeanDefintion的地方
+	 * @param readerContext 读取资源的上下文容器
+	 * @param root 需要解析的根节点
+	 * @return
+	 */
 	protected BeanDefinitionParserDelegate createHelper(XmlReaderContext readerContext, Element root) {
 		BeanDefinitionParserDelegate delegate = new BeanDefinitionParserDelegate(readerContext);
 		delegate.initDefaults(root);
@@ -130,6 +150,8 @@ public class DefaultBeanDefinitionDocumentReader implements BeanDefinitionDocume
 	 */
 	protected void parseBeanDefinitions(Element root, BeanDefinitionParserDelegate delegate) {
 		// 该处会判断是否使用了默认的命名空间，也即是 .../beans
+		// 这里判断一个Element是否为isDefaultNameSpace而言，是通过标签是否包含了前缀来判断
+		// 比如<aop:config/>指向的就是aop的命名空间
 		if (delegate.isDefaultNamespace(root)) {
 			NodeList nl = root.getChildNodes();
 			for (int i = 0; i < nl.getLength(); i++) {
@@ -139,6 +161,8 @@ public class DefaultBeanDefinitionDocumentReader implements BeanDefinitionDocume
 
 					// 判断该元素是否为命名空间定义的元素
 					if (delegate.isDefaultNamespace(ele)) {
+						// 这里主要解析的是/beans下的, 并且是在http://www.springframework.org/schema/beans
+						// 中定义的元素
 						parseDefaultElement(ele, delegate);
 					}
 					else {
@@ -161,7 +185,8 @@ public class DefaultBeanDefinitionDocumentReader implements BeanDefinitionDocume
 	 */
 	private void parseDefaultElement(Element ele, BeanDefinitionParserDelegate delegate) {
 
-	  // 该处为了解析<import>节点
+	  // 该处为了解析<import>节点, 这里实际上是根据节点的定义顺序
+		// 来实现进行解析和加载, 因此, 这个方法可能会被递归调用很多次
 		if (delegate.nodeNameEquals(ele, IMPORT_ELEMENT)) {
 			importBeanDefinitionResource(ele);
 		}

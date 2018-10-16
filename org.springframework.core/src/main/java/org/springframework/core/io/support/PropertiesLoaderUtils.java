@@ -85,6 +85,10 @@ public abstract class PropertiesLoaderUtils {
 	/**
 	 * Load all properties from the given class path resource,
 	 * using the given class loader.
+	 *
+	 * 加载所有classpath下的资源, 通过给定的类加载器, 如果包含了多个的配置文件信息
+	 * , 会将内容进行合并
+	 *
 	 * <p>Merges properties if more than one resource of the same name
 	 * found in the class path.
 	 * @param resourceName the name of the class path resource
@@ -100,6 +104,7 @@ public abstract class PropertiesLoaderUtils {
 			clToUse = ClassUtils.getDefaultClassLoader();
 		}
 		Properties properties = new Properties();
+		// 通过URL的方式获取对应的输入流信息, 并将输入流进行加载
 		Enumeration urls = clToUse.getResources(resourceName);
 		while (urls.hasMoreElements()) {
 			URL url = (URL) urls.nextElement();

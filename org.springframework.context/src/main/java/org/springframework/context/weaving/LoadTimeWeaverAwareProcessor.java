@@ -30,7 +30,7 @@ import org.springframework.util.Assert;
  * to beans that implement the {@link LoadTimeWeaverAware} interface.
  *
  * <p>{@link org.springframework.context.ApplicationContext Application contexts}
- * will automatically register this with their underlying {@link BeanFactory bean factory},
+ * will automatically register this with their underlying(潜在的) {@link BeanFactory bean factory},
  * provided that a default <code>LoadTimeWeaver</code> is actually available.
  *
  * <p>Applications should not use this class directly.

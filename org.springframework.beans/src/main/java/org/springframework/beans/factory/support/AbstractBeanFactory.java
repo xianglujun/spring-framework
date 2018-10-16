@@ -383,6 +383,11 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 		return (T) bean;
 	}
 
+	/**
+	 * 判断当前的{@link BeanFactory}是否包含了对应的`beanName`
+	 * @param name the name of the bean to query
+	 * @return
+	 */
 	public boolean containsBean(String name) {
 		String beanName = transformedBeanName(name);
 		if (containsSingleton(beanName) || containsBeanDefinition(beanName)) {

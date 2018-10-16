@@ -142,6 +142,8 @@ public abstract class AbstractBeanDefinitionReader implements BeanDefinitionRead
 		Assert.notNull(resources, "Resource array must not be null");
 		int counter = 0;
 		for (Resource resource : resources) {
+			// 在AbstractBeanDefinitionReader中, 当前的加载并没有实现具体的加载逻辑,
+			// 就是直接交由其子类来进行具体的实现
 			counter += loadBeanDefinitions(resource);
 		}
 		return counter;
@@ -173,9 +175,12 @@ public abstract class AbstractBeanDefinitionReader implements BeanDefinitionRead
 					"Cannot import bean definitions from location [" + location + "]: no ResourceLoader available");
 		}
 
+		// ResourcePatternResolver解决的是, 同一个的location可能会有多个Resource的
+		// 信息, 因此这里实际上有一个小小的区别
 		if (resourceLoader instanceof ResourcePatternResolver) {
 			// Resource pattern matching available.
 			try {
+				// 对于ApplicationContext而言, PathMatchingResourcePatternResolver作为默认的资源解析器
 				Resource[] resources = ((ResourcePatternResolver) resourceLoader).getResources(location);
 				int loadCount = loadBeanDefinitions(resources);
 				if (actualResources != null) {

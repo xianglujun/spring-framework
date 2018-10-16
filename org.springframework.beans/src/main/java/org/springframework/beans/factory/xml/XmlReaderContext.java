@@ -40,7 +40,15 @@ public class XmlReaderContext extends ReaderContext {
 
 	private final NamespaceHandlerResolver namespaceHandlerResolver;
 
-
+	/**
+	 * XML读取的上下文容器, 用于保存必要的信息
+	 * @param resource 加载的XML资源
+	 * @param problemReporter 问题报告
+	 * @param eventListener 事件监听器
+	 * @param sourceExtractor 资源提取器
+	 * @param reader XML的BeanDefintion的读取对象
+	 * @param namespaceHandlerResolver 对于XML中的命名空间处理器
+	 */
 	public XmlReaderContext(
 			Resource resource, ProblemReporter problemReporter,
 			ReaderEventListener eventListener, SourceExtractor sourceExtractor,

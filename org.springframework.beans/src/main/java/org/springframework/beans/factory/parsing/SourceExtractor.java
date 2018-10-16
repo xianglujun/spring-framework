@@ -36,7 +36,7 @@ import org.springframework.core.io.Resource;
 public interface SourceExtractor {
 
 	/**
-	 * Extract the source metadata from the candidate object supplied
+	 * Extract the source metadata from the candidate(候选者) object supplied
 	 * by the configuration parser.
 	 * @param sourceCandidate the original source metadata (never <code>null</code>)
 	 * @param definingResource the resource that defines the given source object

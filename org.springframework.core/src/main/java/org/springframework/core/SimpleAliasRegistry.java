@@ -39,23 +39,26 @@ public class SimpleAliasRegistry implements AliasRegistry {
 
 	/** Map from alias to canonical name
 	 *  哇塞，你看到没得，在注册alias的时候，居然用的是CurrencyHashMap耶。哈哈哈~~~~~
+	 *  这里主要是映射了一个alias 和 name的映射关系, 方便后面在BeanDefinition的时候使用
 	 * */
 	private final Map<String, String> aliasMap = new ConcurrentHashMap<String, String>();
 
 
 	/**
-	 * 注册别名信息
+	 * 注册别名信息, 以alias-name的形式存储，在存储过程中，需要方式名称的循环引用
 	 * @param name the canonical name
 	 * @param alias the alias to be registered
 	 */
 	public void registerAlias(String name, String alias) {
 		Assert.hasText(name, "'name' must not be empty");
 		Assert.hasText(alias, "'alias' must not be empty");
+		// 如果name和命名相同, 则直接移除
 		if (alias.equals(name)) {
 			this.aliasMap.remove(alias);
 		}
 		else {
 			// 判断别名是否能够被覆盖，如果不能被覆盖，那你惨了, 将会抛出异常哦
+			// 在DefaultListableBeanFactory中, 别名是默认允许覆盖的
 			if (!allowAliasOverriding()) {
 				String registeredName = this.aliasMap.get(alias);
 				if (registeredName != null && !registeredName.equals(name)) {

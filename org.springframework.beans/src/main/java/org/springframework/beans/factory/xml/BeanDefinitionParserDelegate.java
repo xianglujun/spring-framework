@@ -239,6 +239,7 @@ public class BeanDefinitionParserDelegate {
 
 	/**
 	 * Stores all used bean names so we can enforce uniqueness on a per file basis.
+	 * 这里存储的是所有已经使用过的beanName, 在每一个配置文件之中, 我们强制beanName只能出现一次
 	 */
 	private final Set<String> usedNames = new HashSet<String>();
 
@@ -306,16 +307,26 @@ public class BeanDefinitionParserDelegate {
 	 * autowire, dependency check settings, init-method, destroy-method and merge settings.
 	 */
 	protected void populateDefaults(DocumentDefaultsDefinition defaults, Element root) {
+		// 获取default-lazy-init属性
 		defaults.setLazyInit(root.getAttribute(DEFAULT_LAZY_INIT_ATTRIBUTE));
+		// 获取default-merge属性
 		defaults.setMerge(root.getAttribute(DEFAULT_MERGE_ATTRIBUTE));
+		// 获取default-autowire属性
 		defaults.setAutowire(root.getAttribute(DEFAULT_AUTOWIRE_ATTRIBUTE));
+		// 获取default-dependency-check配置
 		defaults.setDependencyCheck(root.getAttribute(DEFAULT_DEPENDENCY_CHECK_ATTRIBUTE));
+
+		// 判断是否包含了default-autowire-candidates属性
 		if (root.hasAttribute(DEFAULT_AUTOWIRE_CANDIDATES_ATTRIBUTE)) {
 			defaults.setAutowireCandidates(root.getAttribute(DEFAULT_AUTOWIRE_CANDIDATES_ATTRIBUTE));
 		}
+
+		// 判断是否包含了default-init-method属性
 		if (root.hasAttribute(DEFAULT_INIT_METHOD_ATTRIBUTE)) {
 			defaults.setInitMethod(root.getAttribute(DEFAULT_INIT_METHOD_ATTRIBUTE));
 		}
+
+		// 判断是否包含了default-destroy-method属性
 		if (root.hasAttribute(DEFAULT_DESTROY_METHOD_ATTRIBUTE)) {
 			defaults.setDestroyMethod(root.getAttribute(DEFAULT_DESTROY_METHOD_ATTRIBUTE));
 		}
@@ -372,6 +383,7 @@ public class BeanDefinitionParserDelegate {
 
 		// 该处是读取bean 节点的id属性的name属性，在这里将会看到id和name属性的不同
 		String id = ele.getAttribute(ID_ATTRIBUTE);
+		// 获取name属性
 		String nameAttr = ele.getAttribute(NAME_ATTRIBUTE);
 
 		List<String> aliases = new ArrayList<String>();
@@ -394,8 +406,9 @@ public class BeanDefinitionParserDelegate {
 			}
 		}
 
-		// 该处给出了一个containingBean的用法, 该处主要需要判断
-		// 新增的Bean的 bean name是否已经存在
+		// 该处主要判断别名是否已经被使用, 被使用的标准通过
+		// 判断id属性的配置和aliases列表中的所有值, 是否已经在usedNames列表中出现
+		// 如果已经出现, 则报告错误信息
 		if (containingBean == null) {
 			checkNameUniqueness(beanName, aliases, ele);
 		}
@@ -456,6 +469,7 @@ public class BeanDefinitionParserDelegate {
 	protected void checkNameUniqueness(String beanName, List<String> aliases, Element beanElement) {
 		String foundName = null;
 
+		// 该处是为了判断当前解析的beanName是否已经被使用
 		if (StringUtils.hasText(beanName) && this.usedNames.contains(beanName)) {
 			foundName = beanName;
 		}
@@ -469,7 +483,9 @@ public class BeanDefinitionParserDelegate {
 			error("Bean name '" + foundName + "' is already used in this file", beanElement);
 		}
 
+		// 将使用过的beanName放入已经使用的列表中
 		this.usedNames.add(beanName);
+		// 同时, 将name属性的值, 也放入别名信息中
 		this.usedNames.addAll(aliases);
 	}
 
@@ -516,7 +532,7 @@ public class BeanDefinitionParserDelegate {
 			// 这里解析了replace-method的节点
 			parseReplacedMethodSubElements(ele, bd.getMethodOverrides());
 
-			// 解析构造行数类型
+			// 解析构造函数类型
 			parseConstructorArgElements(ele, bd);
 
 			// 解析property节点
@@ -615,9 +631,12 @@ public class BeanDefinitionParserDelegate {
 		// 获取 autowire-candidate 属性
 		String autowireCandidate = ele.getAttribute(AUTOWIRE_CANDIDATE_ATTRIBUTE);
 		if ("".equals(autowireCandidate) || DEFAULT_VALUE.equals(autowireCandidate)) {
+			// 这里是获取默认的<beans>节点的default-autowire-candidate的属性
 			String candidatePattern = this.defaults.getAutowireCandidates();
 			if (candidatePattern != null) {
+				// candidate的值可以配置多个, 以','隔开
 				String[] patterns = StringUtils.commaDelimitedListToStringArray(candidatePattern);
+				// 然后将当前的candidate的每个值与beanName进行简单的匹配,如果匹配成功则返回true, 失败返回false
 				bd.setAutowireCandidate(PatternMatchUtils.simpleMatch(patterns, beanName));
 			}
 		}
@@ -727,23 +746,31 @@ public class BeanDefinitionParserDelegate {
 
 	public int getAutowireMode(String attValue) {
 		String att = attValue;
+		// 如果<bean>的autowire属性的是为default, 则默认使用<beans>的default-autowire的属性
 		if (DEFAULT_VALUE.equals(att)) {
 			att = this.defaults.getAutowire();
 		}
+
+
 		int autowire = AbstractBeanDefinition.AUTOWIRE_NO;
+		// 如果值为byName, 则使用 1
 		if (AUTOWIRE_BY_NAME_VALUE.equals(att)) {
 			autowire = AbstractBeanDefinition.AUTOWIRE_BY_NAME;
 		}
 		else if (AUTOWIRE_BY_TYPE_VALUE.equals(att)) {
+		  // 如果其值为byType, 则使用 2
 			autowire = AbstractBeanDefinition.AUTOWIRE_BY_TYPE;
 		}
 		else if (AUTOWIRE_CONSTRUCTOR_VALUE.equals(att)) {
+		  // 如果为constructor, 则使用 3
 			autowire = AbstractBeanDefinition.AUTOWIRE_CONSTRUCTOR;
 		}
 		else if (AUTOWIRE_AUTODETECT_VALUE.equals(att)) {
+		  // 如果是autodetect, 则使用 4
 			autowire = AbstractBeanDefinition.AUTOWIRE_AUTODETECT;
 		}
 		// Else leave default value.
+    // 如果autowire的值没有设置, 或者未匹配到合适的值, 以0代替
 		return autowire;
 	}
 
@@ -987,25 +1014,37 @@ public class BeanDefinitionParserDelegate {
 	 * Parse a qualifier element.
 	 */
 	public void parseQualifierElement(Element ele, AbstractBeanDefinition bd) {
+		// 获取qualifier节点的type属性
 		String typeName = ele.getAttribute(TYPE_ATTRIBUTE);
 		if (!StringUtils.hasLength(typeName)) {
 			error("Tag 'qualifier' must have a 'type' attribute", ele);
 			return;
 		}
+		// 将当前正在加载的节点加入到解析状态之中
 		this.parseState.push(new QualifierEntry(typeName));
 		try {
 			AutowireCandidateQualifier qualifier = new AutowireCandidateQualifier(typeName);
 			qualifier.setSource(extractSource(ele));
+
+			// 获取<qualifier>节点的value属性
 			String value = ele.getAttribute(VALUE_ATTRIBUTE);
+
+			// 如果value属性的值设置成功
 			if (StringUtils.hasLength(value)) {
+				// 将当前的value的值加入到对象之中
 				qualifier.setAttribute(AutowireCandidateQualifier.VALUE_KEY, value);
 			}
+			// 获取下面的所有节点
 			NodeList nl = ele.getChildNodes();
 			for (int i = 0; i < nl.getLength(); i++) {
 				Node node = nl.item(i);
+				// 判断节点是否为attribute节点
 				if (isCandidateElement(node) && nodeNameEquals(node, QUALIFIER_ATTRIBUTE_ELEMENT)) {
 					Element attributeEle = (Element) node;
+
+					// 获取<attribute>节点的key属性
 					String attributeName = attributeEle.getAttribute(KEY_ATTRIBUTE);
+					// 获取<attribute>节点的value属性
 					String attributeValue = attributeEle.getAttribute(VALUE_ATTRIBUTE);
 					if (StringUtils.hasLength(attributeName) && StringUtils.hasLength(attributeValue)) {
 						BeanMetadataAttribute attribute = new BeanMetadataAttribute(attributeName, attributeValue);
@@ -1028,6 +1067,10 @@ public class BeanDefinitionParserDelegate {
 	/**
 	 * Get the value of a property element. May be a list etc.
 	 * Also used for constructor arguments, "propertyName" being null in this case.
+	 * <p>这里是为了获取property节点的值, 但是这里有两种情况都可能获取到property节点的值,
+	 * 如果{@code propertyName}的值不为<code>null</code>, 则是获取property节点的值;
+	 * 如果{@code propertyName}的值为<code>null</code>, 则是获取constructor节点的参数</p>
+	 *
 	 */
 	public Object parsePropertyValue(Element ele, BeanDefinition bd, String propertyName) {
 
@@ -1326,6 +1369,13 @@ public class BeanDefinitionParserDelegate {
 		return target;
 	}
 
+	/**
+	 * 解析几何下的所有节点信息
+	 * @param elementNodes
+	 * @param target
+	 * @param bd
+	 * @param defaultElementType
+	 */
 	protected void parseCollectionElements(
 			NodeList elementNodes, Collection<Object> target, BeanDefinition bd, String defaultElementType) {
 
@@ -1339,11 +1389,15 @@ public class BeanDefinitionParserDelegate {
 
 	/**
 	 * Parse a map element.
+	 * 解析&lt;map&gt;元素节点
 	 */
 	public Map parseMapElement(Element mapEle, BeanDefinition bd) {
+		// 获取key-type属性, 用于标记map中的key的类型
 		String defaultKeyType = mapEle.getAttribute(KEY_TYPE_ATTRIBUTE);
+		// 获取value-type属性, 用于标记map中的value类型
 		String defaultValueType = mapEle.getAttribute(VALUE_TYPE_ATTRIBUTE);
 
+		// 获取所有的<entry>节点
 		List<Element> entryEles = DomUtils.getChildElementsByTagName(mapEle, ENTRY_ELEMENT);
 		ManagedMap<Object, Object> map = new ManagedMap<Object, Object>(entryEles.size());
 		map.setSource(extractSource(mapEle));
@@ -1523,6 +1577,14 @@ public class BeanDefinitionParserDelegate {
 		return parseCustomElement(ele, null);
 	}
 
+	/**
+	 * 这里是处理自定义的一些节点信息, 这里我个人觉得是一个开放的使用, 因为我们可以采用
+	 * META-INF/spring.handlers的方式, 来自定义我们自己的空间处理器, 这样的话, 我们就可以
+	 * 通过自定义的方式来实现不同的元素节点，加载不同的BeanDefinition信息
+	 * @param ele
+	 * @param containingBd
+	 * @return
+	 */
 	public BeanDefinition parseCustomElement(Element ele, BeanDefinition containingBd) {
 		String namespaceUri = getNamespaceURI(ele);
 		NamespaceHandler handler = this.readerContext.getNamespaceHandlerResolver().resolve(namespaceUri);

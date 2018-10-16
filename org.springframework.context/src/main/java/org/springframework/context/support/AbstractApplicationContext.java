@@ -419,7 +419,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 				registerBeanPostProcessors(beanFactory);
 
 				// Initialize message source for this context.
-				// 队上下问中的消息源进行初始化
+				// 对上下问中的消息源进行初始化
 				initMessageSource();
 
 				// Initialize event multicaster for this context.
@@ -529,6 +529,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 		}
 
 		// Register default environment beans.
+		// 将系统的默认的配置信息加载到DefaultSingletonBeanRegistry中,
 		if (!beanFactory.containsBean(SYSTEM_PROPERTIES_BEAN_NAME)) {
 			Map systemProperties;
 			try {
@@ -554,6 +555,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 			beanFactory.registerSingleton(SYSTEM_PROPERTIES_BEAN_NAME, systemProperties);
 		}
 
+		// 判断是否包含systemEnvironment实例
 		if (!beanFactory.containsBean(SYSTEM_ENVIRONMENT_BEAN_NAME)) {
 			Map<String,String> systemEnvironment;
 			try {
@@ -592,36 +594,60 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 
 	/**
 	 * Instantiate and invoke all registered BeanFactoryPostProcessor beans,
-	 * respecting explicit order if given.
+	 * respecting(关于, 鉴于，就...而言) explicit order if given.
 	 * <p>Must be called before singleton instantiation.
 	 */
 	protected void invokeBeanFactoryPostProcessors(ConfigurableListableBeanFactory beanFactory) {
 		// Invoke BeanDefinitionRegistryPostProcessors first, if any.
 		Set<String> processedBeans = new HashSet<String>();
+
+		// 判断该BeanFactory是否为BeanDefinitionRegistry的实例, 其实这个实例就是注册BeanDefinition
+		// 到集合之中.
 		if (beanFactory instanceof BeanDefinitionRegistry) {
 			BeanDefinitionRegistry registry = (BeanDefinitionRegistry) beanFactory;
+			// 需要执行的PostProcessor的集合
 			List<BeanFactoryPostProcessor> regularPostProcessors = new LinkedList<BeanFactoryPostProcessor>();
+
+			// 这里是BeanDefinitionRegistryPostProcessor列表
 			List<BeanDefinitionRegistryPostProcessor> registryPostProcessors =
 					new LinkedList<BeanDefinitionRegistryPostProcessor>();
+
+			// 获取当前的ApplicationContext中注册的BeanFactoryPostProcessor的列表
 			for (BeanFactoryPostProcessor postProcessor : getBeanFactoryPostProcessors()) {
+				// 判断postProcessor是否为BeanDefinitionRegistryPostProcessor的实例, 这里
+        // 是因为BeanDefinitionRegistryPostProcessor的一个扩展操作, 对应不同的需求
 				if (postProcessor instanceof BeanDefinitionRegistryPostProcessor) {
 					BeanDefinitionRegistryPostProcessor registryPostProcessor =
 							(BeanDefinitionRegistryPostProcessor) postProcessor;
+					// 执行BeanDefinitionRegistryPostProcessor之力
 					registryPostProcessor.postProcessBeanDefinitionRegistry(registry);
+					// 将当前的BeanDefinitionRegistryPostProcessor的实例加入到列表之中
 					registryPostProcessors.add(registryPostProcessor);
 				}
 				else {
+				  // 这里直接加入到BeanFactoryPostProcessor的列表之中
 					regularPostProcessors.add(postProcessor);
 				}
 			}
+
+			// 这里是从BeanFactory的列表中获取BeanDefinitionRegistryPostProcessor的定义
+			// 这里从容器中获取对应的类型实例的时候, 就会实例化对应的对象
 			Map<String, BeanDefinitionRegistryPostProcessor> beanMap =
 					beanFactory.getBeansOfType(BeanDefinitionRegistryPostProcessor.class, true, false);
+
+			// 将map中的BeanDefinitionRegistryPostProcessor加入到列表之中
 			List<BeanDefinitionRegistryPostProcessor> registryPostProcessorBeans =
 					new ArrayList<BeanDefinitionRegistryPostProcessor>(beanMap.values());
+
+			// 列表中是按照Ordered进行排序, 排序的值越大,月考后
 			OrderComparator.sort(registryPostProcessorBeans);
+
+			// 遍历并执行所有的BeanDefinitionRegistryPostProcessor
 			for (BeanDefinitionRegistryPostProcessor postProcessor : registryPostProcessorBeans) {
 				postProcessor.postProcessBeanDefinitionRegistry(registry);
 			}
+
+			// 执行所有的BeanFactoryPostProcessor的执行
 			invokeBeanFactoryPostProcessors(registryPostProcessors, beanFactory);
 			invokeBeanFactoryPostProcessors(registryPostProcessorBeans, beanFactory);
 			invokeBeanFactoryPostProcessors(regularPostProcessors, beanFactory);
@@ -698,7 +724,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 
 		// Register BeanPostProcessorChecker that logs an info message when
 		// a bean is created during BeanPostProcessor instantiation, i.e. when
-		// a bean is not eligible for getting processed by all BeanPostProcessors.
+		// a bean is not eligible(合格) for getting processed by all BeanPostProcessors.
 		int beanProcessorTargetCount = beanFactory.getBeanPostProcessorCount() + 1 + postProcessorNames.length;
 		beanFactory.addBeanPostProcessor(new BeanPostProcessorChecker(beanFactory, beanProcessorTargetCount));
 
@@ -1371,6 +1397,12 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 
 		private final Map<String, Boolean> singletonNames = new ConcurrentHashMap<String, Boolean>();
 
+    /**
+     * 通过该方法用于标记那些Bean是单例模式
+     * @param beanDefinition the merged bean definition for the bean
+     * @param beanType the actual type of the managed bean instance
+     * @param beanName the name of the bean
+     */
 		public void postProcessMergedBeanDefinition(RootBeanDefinition beanDefinition, Class beanType, String beanName) {
 			if (beanDefinition.isSingleton()) {
 				this.singletonNames.put(beanName, Boolean.TRUE);

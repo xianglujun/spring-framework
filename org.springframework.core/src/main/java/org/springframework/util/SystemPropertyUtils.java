@@ -76,6 +76,7 @@ public abstract class SystemPropertyUtils {
 	 * @throws IllegalArgumentException if there is an unresolvable placeholder and the flag is false
 	 */
 	public static String resolvePlaceholders(String text, boolean ignoreUnresolvablePlaceholders) {
+		// 这里获取不同的占位符帮助类, 主要判断的是, 时序能够跳过不能解析的占位符信息
 		PropertyPlaceholderHelper helper = (ignoreUnresolvablePlaceholders ? nonStrictHelper : strictHelper);
 		return helper.replacePlaceholders(text, new SystemPropertyPlaceholderResolver(text));
 	}

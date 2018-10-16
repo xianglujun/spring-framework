@@ -112,16 +112,28 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
 	 */
 	private ReaderEventListener eventListener = new EmptyReaderEventListener();
 
+	/**
+	 * 注入了一个默认的SourceExtractor，这里面什么都没有做
+	 */
 	private SourceExtractor sourceExtractor = new NullSourceExtractor();
 
 	private NamespaceHandlerResolver namespaceHandlerResolver;
 
 	private DocumentLoader documentLoader = new DefaultDocumentLoader();
 
+	/**
+	 * EntityResolver的解析器
+	 */
 	private EntityResolver entityResolver;
 
+	/**
+	 * 这只是一个错误处理器, 里边可能会根据不同的一些错误打印出日志就好
+	 */
 	private ErrorHandler errorHandler = new SimpleSaxErrorHandler(logger);
 
+	/**
+	 * XML验证模式探测器, 主要用于判断当前的xml验证是使用DTD或者XSD的方式进行验证
+	 */
 	private final XmlValidationModeDetector validationModeDetector = new XmlValidationModeDetector();
 
 	private final ThreadLocal<Set<EncodedResource>> resourcesCurrentlyBeingLoaded =
@@ -319,6 +331,7 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
 		}
 
 		// 该处使用到了一个ThreadLocal, 主要目的是为了什么?
+		// 此处使用了ThreadLocal做一个加载的控制, 主要是为了防止Resource的重复加载
 		Set<EncodedResource> currentResources = this.resourcesCurrentlyBeingLoaded.get();
 
 		// 如果与当前线程没有绑定Resource,则创建一个新的列表，并与当前线程进行绑定
@@ -339,6 +352,7 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
 			InputStream inputStream = encodedResource.getResource().getInputStream();
 			try {
 				InputSource inputSource = new InputSource(inputStream);
+				// 该处设置编码形式, 主要是为了不同的编码格式的不同处理
 				if (encodedResource.getEncoding() != null) {
 					inputSource.setEncoding(encodedResource.getEncoding());
 				}
@@ -347,6 +361,7 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
 				return doLoadBeanDefinitions(inputSource, encodedResource.getResource());
 			}
 			finally {
+				// 关闭资源
 				inputStream.close();
 			}
 		}
@@ -355,8 +370,10 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
 					"IOException parsing XML document from " + encodedResource.getResource(), ex);
 		}
 		finally {
+			// 移除当前加载的资源信息
 			currentResources.remove(encodedResource);
 			if (currentResources.isEmpty()) {
+				// 如果当前线程加载资源完毕, 则将当前线程的绑定信息进行删除
 				this.resourcesCurrentlyBeingLoaded.remove();
 			}
 		}

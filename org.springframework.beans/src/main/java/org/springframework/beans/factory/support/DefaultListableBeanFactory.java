@@ -283,6 +283,10 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 		return this.beanDefinitionMap.size();
 	}
 
+	/**
+	 * 获取所有的beanName列表
+	 * @return
+	 */
 	public String[] getBeanDefinitionNames() {
 		synchronized (this.beanDefinitionMap) {
 			if (this.frozenBeanDefinitionNames != null) {
@@ -298,6 +302,18 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 		return getBeanNamesForType(type, true, true);
 	}
 
+	/**
+	 * 根据类型获取所有的bean的名称
+	 * @param type the class or interface to match, or <code>null</code> for all bean names
+	 * @param includeNonSingletons whether to include prototype or scoped beans too
+	 * or just singletons (also applies to FactoryBeans)
+	 * @param allowEagerInit whether to initialize <i>lazy-init singletons</i> and
+	 * <i>objects created by FactoryBeans</i> (or by factory methods with a
+	 * "factory-bean" reference) for the type check. Note that FactoryBeans need to be
+	 * eagerly initialized to determine their type: So be aware that passing in "true"
+	 * for this flag will initialize FactoryBeans and "factory-bean" references.
+	 * @return
+	 */
 	public String[] getBeanNamesForType(Class type, boolean includeNonSingletons, boolean allowEagerInit) {
 		List<String> result = new ArrayList<String>();
 
@@ -351,6 +367,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 		}
 
 		// Check singletons too, to catch manually registered singletons.
+		// 在这里的实现中, 看到其实如果没有传入type的类型, 默认是获取所有的bean definition的名称
 		String[] singletonNames = getSingletonNames();
 		for (String beanName : singletonNames) {
 			// Only check if manually registered.
@@ -390,6 +407,20 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 		return getBeansOfType(type, true, true);
 	}
 
+	/**
+	 * 根据类型获取所有的bean列表
+	 * @param type the class or interface to match, or <code>null</code> for all concrete beans
+	 * @param includeNonSingletons whether to include prototype or scoped beans too
+	 * or just singletons (also applies to FactoryBeans)
+	 * @param allowEagerInit whether to initialize <i>lazy-init singletons</i> and
+	 * <i>objects created by FactoryBeans</i> (or by factory methods with a
+	 * "factory-bean" reference) for the type check. Note that FactoryBeans need to be
+	 * eagerly initialized to determine their type: So be aware that passing in "true"
+	 * for this flag will initialize FactoryBeans and "factory-bean" references.
+	 * @param <T>
+	 * @return
+	 * @throws BeansException
+	 */
 	public <T> Map<String, T> getBeansOfType(Class<T> type, boolean includeNonSingletons, boolean allowEagerInit)
 			throws BeansException {
 
@@ -552,6 +583,10 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 		return (this.configurationFrozen || super.isBeanEligibleForMetadataCaching(beanName));
 	}
 
+	/**
+	 * 预初始化单例实例
+	 * @throws BeansException
+	 */
 	public void preInstantiateSingletons() throws BeansException {
 		if (this.logger.isInfoEnabled()) {
 			this.logger.info("Pre-instantiating singletons in " + this);

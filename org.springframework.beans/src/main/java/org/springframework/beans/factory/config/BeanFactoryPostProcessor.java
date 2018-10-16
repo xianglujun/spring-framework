@@ -23,7 +23,8 @@ import org.springframework.beans.BeansException;
  * adapting the bean property values of the context's underlying bean factory.
  *
  * <p>Application contexts can auto-detect BeanFactoryPostProcessor beans in
- * their bean definitions and apply them before any other beans get created.
+ * their bean definitions and apply them before any other beans get created. (在application context的容器中,
+ *  在它的所有的bean定义中能够自动探测BeanFactorPostProcessor的实例并在其他beans创建之前执行"post-processor")
  *
  * <p>Useful for custom config files targeted at system administrators that
  * override bean properties configured in the application context.

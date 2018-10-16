@@ -23,11 +23,17 @@ import org.springframework.beans.factory.parsing.DefaultsDefinition;
  * level in a standard Spring XML bean definition document:
  * <code>default-lazy-init</code>, <code>default-autowire</code>, etc.
  *
+ * <p>这是一个很简单的JavaBean, 用于持有对&lt;beans&gt;根节点的bean definition的配置信息，
+ * 主要包含了default-lazy-init, default-autowire<p/>
+ *
  * @author Juergen Hoeller
  * @since 2.0.2
  */
 public class DocumentDefaultsDefinition implements DefaultsDefinition {
 
+	/**
+	 * 懒初始化
+	 */
 	private String lazyInit;
 
 	private String merge;
