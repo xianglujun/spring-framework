@@ -213,16 +213,27 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 	 * @param original the original bean definition to copy from
 	 */
 	protected AbstractBeanDefinition(BeanDefinition original) {
+		// 设置parentName
 		setParentName(original.getParentName());
+		// 设置beanClassName
 		setBeanClassName(original.getBeanClassName());
+		// 设置factoryBeanName
 		setFactoryBeanName(original.getFactoryBeanName());
+		// 设置factory-method
 		setFactoryMethodName(original.getFactoryMethodName());
+		// 设置scope
 		setScope(original.getScope());
+		// 设置abstract
 		setAbstract(original.isAbstract());
+		// 设置lazyInit
 		setLazyInit(original.isLazyInit());
+		// 设置role
 		setRole(original.getRole());
+		// 设置constructorArgumentValues
 		setConstructorArgumentValues(new ConstructorArgumentValues(original.getConstructorArgumentValues()));
+		// 设置propertyValues
 		setPropertyValues(new MutablePropertyValues(original.getPropertyValues()));
+		// 设置数据源
 		setSource(original.getSource());
 		copyAttributesFrom(original);
 
@@ -231,20 +242,34 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 			if (originalAbd.hasBeanClass()) {
 				setBeanClass(originalAbd.getBeanClass());
 			}
+			// 设置autowireMode
 			setAutowireMode(originalAbd.getAutowireMode());
+			// 设置dependencyCheck
 			setDependencyCheck(originalAbd.getDependencyCheck());
+			// 设置dependsOn
 			setDependsOn(originalAbd.getDependsOn());
+			// 设置autowireCandidate
 			setAutowireCandidate(originalAbd.isAutowireCandidate());
+			// 设置Quoalifiers
 			copyQualifiersFrom(originalAbd);
+			// 设置primary
 			setPrimary(originalAbd.isPrimary());
+			// 设置nonPublicAccessAllowed
 			setNonPublicAccessAllowed(originalAbd.isNonPublicAccessAllowed());
 			setLenientConstructorResolution(originalAbd.isLenientConstructorResolution());
+			// 设置初始化方法
 			setInitMethodName(originalAbd.getInitMethodName());
+			// 设置enforceInitMethod
 			setEnforceInitMethod(originalAbd.isEnforceInitMethod());
+			// 设置destroyMethodName
 			setDestroyMethodName(originalAbd.getDestroyMethodName());
+			// 设置EnforceDestroyMethod
 			setEnforceDestroyMethod(originalAbd.isEnforceDestroyMethod());
+			// 设置methodOverrides
 			setMethodOverrides(new MethodOverrides(originalAbd.getMethodOverrides()));
+			// 设置是否synthetic
 			setSynthetic(originalAbd.isSynthetic());
+			// 设置数据源resource
 			setResource(originalAbd.getResource());
 		}
 		else {
@@ -949,6 +974,7 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 	 */
 	public void prepareMethodOverrides() throws BeanDefinitionValidationException {
 		// Check that lookup methods exists.
+		// 在XML定义中, 只有LookupMethodOverride和ReplaceOverride两种类型
 		MethodOverrides methodOverrides = getMethodOverrides();
 		if (!methodOverrides.isEmpty()) {
 			for (MethodOverride mo : methodOverrides.getOverrides()) {
@@ -965,8 +991,10 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 	 * @throws BeanDefinitionValidationException in case of validation failure
 	 */
 	protected void prepareMethodOverride(MethodOverride mo) throws BeanDefinitionValidationException {
+		// 获取匹配的方法的个数, 会循环便利当前的类型, 父类中的所有的方法
 		int count = ClassUtils.getMethodCountForName(getBeanClass(), mo.getMethodName());
 		if (count == 0) {
+			// 对于不能覆盖的方法, 则会抛出异常
 			throw new BeanDefinitionValidationException(
 					"Invalid method override: no method with name '" + mo.getMethodName() +
 					"' on class [" + getBeanClassName() + "]");

@@ -95,10 +95,12 @@ public abstract class FactoryBeanRegistrySupport extends DefaultSingletonBeanReg
 	 * @see org.springframework.beans.factory.FactoryBean#getObject()
 	 */
 	protected Object getObjectFromFactoryBean(FactoryBean factory, String beanName, boolean shouldPostProcess) {
+		// 判断当前的bean是否为单例, 并且需要创建beanName是否已经被创建
 		if (factory.isSingleton() && containsSingleton(beanName)) {
 			synchronized (getSingletonMutex()) {
 				Object object = this.factoryBeanObjectCache.get(beanName);
 				if (object == null) {
+					// 如果缓存之中没有创建对应的实例, 则将当前FactoryBean创建的对象放入缓存之中
 					object = doGetObjectFromFactoryBean(factory, beanName, shouldPostProcess);
 					this.factoryBeanObjectCache.put(beanName, (object != null ? object : NULL_OBJECT));
 				}
@@ -106,6 +108,7 @@ public abstract class FactoryBeanRegistrySupport extends DefaultSingletonBeanReg
 			}
 		}
 		else {
+			// 如果FactoryBean不是单例, 则直接创建需要的对象
 			return doGetObjectFromFactoryBean(factory, beanName, shouldPostProcess);
 		}
 	}
@@ -159,6 +162,7 @@ public abstract class FactoryBeanRegistrySupport extends DefaultSingletonBeanReg
 
 		if (object != null && shouldPostProcess) {
 			try {
+				// 如果object创建成功, 这是就需要执行BeanPostProcessor的后置处理器
 				object = postProcessObjectFromFactoryBean(object, beanName);
 			}
 			catch (Throwable ex) {

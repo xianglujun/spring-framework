@@ -182,19 +182,27 @@ public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements
 	protected Object getSingleton(String beanName, boolean allowEarlyReference) {
 		// 这里主要是维护了一个ConcurrencyHashMap, 所有的单例实例都是放在了singletonObjects之中
 		Object singletonObject = this.singletonObjects.get(beanName);
-		// 该处就代表, 对应的singletonObject是没有被创建
+		// 当前beanName的单例还没有创建
 		if (singletonObject == null) {
+		  // 这里上锁, 是因为很可能会创建对象并放入到单例集合之中
 			synchronized (this.singletonObjects) {
-				// 查看早起的单例模式对象中否包含了对象
+				// 查看实时对象集合中是否已经创建
 				singletonObject = this.earlySingletonObjects.get(beanName);
-				// 在earlySingtonObjects中依然没有找到对应的对象, 这个时候根据allowEarlyReference
-				// 判断是否需要创建对象
+
+				// 如果没有创建, 并且在允许实时创建的时候, 通过ObjectFactory类创建对象
 				if (singletonObject == null && allowEarlyReference) {
-					// 这里回去获取ObjectFactory的对象, 这个对象是用来做什么的???? 所有的bean都有ObjectFactory对象吗?
+
+					// 这里回到单例工厂集合中去获取ObjectFactory对象
 					ObjectFactory singletonFactory = this.singletonFactories.get(beanName);
 					if (singletonFactory != null) {
+
+						// 代表ObjectFactory已经获取并创建了, 则通过getObject()方法实时创建对象
 						singletonObject = singletonFactory.getObject();
+
+						// 将当前对象方法实时单例对象之中
 						this.earlySingletonObjects.put(beanName, singletonObject);
+
+						// 一旦ObjectFactory的对象一旦创建之后, 则需要将当前的ObjectFactory的引用移除
 						this.singletonFactories.remove(beanName);
 					}
 				}
@@ -306,7 +314,7 @@ public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements
 	 * Callback before singleton creation.
 	 * <p>Default implementation register the singleton as currently in creation.
 	 *
-	 *
+	 * 该方法是将正在创建的Singleton加入到正在创建的列表之中
 	 *
 	 * @param beanName the name of the singleton about to be created
 	 * @see #isSingletonCurrentlyInCreation

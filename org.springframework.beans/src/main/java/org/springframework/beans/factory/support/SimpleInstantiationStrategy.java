@@ -42,9 +42,18 @@ import org.springframework.util.StringUtils;
  */
 public class SimpleInstantiationStrategy implements InstantiationStrategy {
 
+	/**
+	 * 对实例进行初始化
+	 * @param beanDefinition the bean definition
+	 * @param beanName name of the bean when it's created in this context.
+	 * The name can be <code>null</code> if we're autowiring a bean that
+	 * doesn't belong to the factory.
+	 * @param owner owning BeanFactory
+	 * @return
+	 */
 	public Object instantiate(RootBeanDefinition beanDefinition, String beanName, BeanFactory owner) {
 		// Don't override the class with CGLIB if no overrides.
-		// 之力的overrides实干什么用的啊???
+		// 没有方法需要覆盖, 这里MethodOverrides包括了很多的类型
 		if (beanDefinition.getMethodOverrides().isEmpty()) {
 			// 这里采用指定的构造器或者生成对象的工厂方法来对Bean进行实例化
 			Constructor<?> constructorToUse;
@@ -66,6 +75,7 @@ public class SimpleInstantiationStrategy implements InstantiationStrategy {
 						else {
 							constructorToUse =	clazz.getDeclaredConstructor((Class[]) null);
 						}
+						// 这里就设置了使用什么样的方式实例化
 						beanDefinition.resolvedConstructorOrFactoryMethod = constructorToUse;
 					}
 					catch (Exception ex) {
@@ -79,7 +89,7 @@ public class SimpleInstantiationStrategy implements InstantiationStrategy {
 		}
 		else {
 			// Must generate CGLIB subclass.
-			// 使用CGLIB来实例化对象
+			// 使用CGLIB来实例化对象, 如果徐璈方法的覆盖, 则通过CGLIB进行加载
 			return instantiateWithMethodInjection(beanDefinition, beanName, owner);
 		}
 	}

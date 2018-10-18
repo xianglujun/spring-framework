@@ -76,6 +76,7 @@ public abstract class GenericTypeResolver {
 	 * @return the corresponding generic parameter or return type
 	 */
 	public static Class<?> resolveParameterType(MethodParameter methodParam, Class clazz) {
+		// 获取当前方法参数对应的参数索引的类型
 		Type genericType = getTargetType(methodParam);
 		Assert.notNull(clazz, "Class must not be null");
 		Map<TypeVariable, Type> typeVariableMap = getTypeVariableMap(clazz);

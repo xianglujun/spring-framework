@@ -35,7 +35,7 @@ public interface PropertyEditorRegistrar {
 	/**
 	 * Register custom {@link java.beans.PropertyEditor PropertyEditors} with
 	 * the given <code>PropertyEditorRegistry</code>.
-	 * <p>The passed-in registry will usually be a {@link BeanWrapper} or a
+	 * <p>The passed-in(置为传入的) registry will usually be a {@link BeanWrapper} or a
 	 * {@link org.springframework.validation.DataBinder DataBinder}.
 	 * <p>It is expected that implementations will create brand new
 	 * <code>PropertyEditors</code> instances for each invocation of this
@@ -44,5 +44,4 @@ public interface PropertyEditorRegistrar {
 	 * custom <code>PropertyEditors</code> with
 	 */
 	void registerCustomEditors(PropertyEditorRegistry registry);
-
 }

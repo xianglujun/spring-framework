@@ -48,7 +48,7 @@ public interface InstantiationAwareBeanPostProcessor extends BeanPostProcessor {
 	/**
 	 * Apply this BeanPostProcessor <i>before the target bean gets instantiated</i>.
 	 * The returned bean object may be a proxy to use instead of the target bean,
-	 * effectively suppressing default instantiation of the target bean.
+	 * effectively suppressing(覆盖) default instantiation of the target bean.
 	 * <p>If a non-null object is returned by this method, the bean creation process
 	 * will be short-circuited. The only further processing applied is the
 	 * {@link #postProcessAfterInitialization} callback from the configured

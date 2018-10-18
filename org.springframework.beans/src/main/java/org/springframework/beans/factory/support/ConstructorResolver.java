@@ -330,6 +330,7 @@ class ConstructorResolver {
 	 * to match with the parameters. We don't have the types attached to constructor args,
 	 * so trial and error is the only way to go here. The explicitArgs array may contain
 	 * argument values passed in programmatically via the corresponding getBean method.
+	 *
 	 * @param beanName the name of the bean
 	 * @param mbd the merged bean definition for the bean
 	 * @param explicitArgs argument values passed in programmatically via the getBean
@@ -337,7 +338,9 @@ class ConstructorResolver {
 	 * @return a BeanWrapper for the new instance
 	 */
 	public BeanWrapper instantiateUsingFactoryMethod(final String beanName, final RootBeanDefinition mbd, final Object[] explicitArgs) {
+		// 创建一个BeanWrapper对象实例
 		BeanWrapperImpl bw = new BeanWrapperImpl();
+		// 通过beanFactory对BeanWrapper进行初始值的设置
 		this.beanFactory.initBeanWrapper(bw);
 
 		Object factoryBean;
@@ -350,15 +353,22 @@ class ConstructorResolver {
 				throw new BeanDefinitionStoreException(mbd.getResourceDescription(), beanName,
 						"factory-bean reference points back to the same bean definition");
 			}
+
+			// 获取factoryBean的实例, 这个实例是通过`factory-bean`进行制定的
 			factoryBean = this.beanFactory.getBean(factoryBeanName);
+
+			// 如果不能获取到实例, 则会抛出异常
 			if (factoryBean == null) {
 				throw new BeanCreationException(mbd.getResourceDescription(), beanName,
 						"factory-bean '" + factoryBeanName + "' returned null");
 			}
+
+			// 获取factoryBean成功, 并获取factoryBean的名称
 			factoryClass = factoryBean.getClass();
 			isStatic = false;
 		}
 		else {
+			// 如果当前的BeanDefintion没有指定factoryBean, 则通过静态工厂的方式创建
 			// It's a static factory method on the bean class.
 			if (!mbd.hasBeanClass()) {
 				throw new BeanDefinitionStoreException(mbd.getResourceDescription(), beanName,
@@ -377,8 +387,12 @@ class ConstructorResolver {
 			argsToUse = explicitArgs;
 		}
 		else {
+			// 如果没有指定创建对象的参数
 			Object[] argsToResolve = null;
+			// 这里加了一个锁
 			synchronized (mbd.constructorArgumentLock) {
+
+				// 这里主要去判断是否已经缓存了一个通过factoryMethod创建的bean的一个方法
 				factoryMethodToUse = (Method) mbd.resolvedConstructorOrFactoryMethod;
 				if (factoryMethodToUse != null && mbd.constructorArgumentsResolved) {
 					// Found a cached factory method...
@@ -388,6 +402,7 @@ class ConstructorResolver {
 					}
 				}
 			}
+
 			if (argsToResolve != null) {
 				argsToUse = resolvePreparedArguments(beanName, mbd, bw, factoryMethodToUse, argsToResolve);
 			}
@@ -746,20 +761,40 @@ class ConstructorResolver {
 
 	/**
 	 * Resolve the prepared arguments stored in the given bean definition.
+	 * @param beanName 当前的beanName
+	 * @param mbd RootBeanDefinition信息
+	 * @param bw BeanWrapper对象
+	 * @param methodOrCtor 创建对象的方法
+	 * @param argsToResolve 创建对象需要的构造函数的参数
+	 * @return
 	 */
 	private Object[] resolvePreparedArguments(
 			String beanName, RootBeanDefinition mbd, BeanWrapper bw, Member methodOrCtor, Object[] argsToResolve) {
 
+		// 这里主要判断的是, 当前创建的method是Method类型还是Constructor类型
+		// 并获取这两个对象嗦需要的参数类型列表
 		Class[] paramTypes = (methodOrCtor instanceof Method ?
 				((Method) methodOrCtor).getParameterTypes() : ((Constructor) methodOrCtor).getParameterTypes());
+
+		// 获取类型转换器, 如果BeanFactory包含了typeConverter, 则默认使用容器自定义的
+		// 如果容器没有定义, 则使用BeanWrapper作为默认的类型装换器
 		TypeConverter converter = (this.beanFactory.getCustomTypeConverter() != null ?
 				this.beanFactory.getCustomTypeConverter() : bw);
+
+		// 获取valueResolver对象
 		BeanDefinitionValueResolver valueResolver =
 				new BeanDefinitionValueResolver(this.beanFactory, beanName, mbd, converter);
+
 		Object[] resolvedArgs = new Object[argsToResolve.length];
+
+		// 这里是遍历所有的参数列表
 		for (int argIndex = 0; argIndex < argsToResolve.length; argIndex++) {
 			Object argValue = argsToResolve[argIndex];
+
+			// 获取MethodParameter的对象
 			MethodParameter methodParam = MethodParameter.forMethodOrConstructor(methodOrCtor, argIndex);
+
+			//
 			GenericTypeResolver.resolveParameterType(methodParam, methodOrCtor.getDeclaringClass());
 			if (argValue instanceof AutowiredArgumentMarker) {
 				argValue = resolveAutowiredArgument(methodParam, beanName, null, converter);
