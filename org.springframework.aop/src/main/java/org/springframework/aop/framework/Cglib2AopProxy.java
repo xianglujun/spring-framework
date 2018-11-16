@@ -145,6 +145,12 @@ final class Cglib2AopProxy implements AopProxy, Serializable {
 		return getProxy(null);
 	}
 
+	/**
+	 * CGLIB
+	 * @param classLoader the class loader to create the proxy with
+	 * (or <code>null</code> for the low-level proxy facility's default)
+	 * @return
+	 */
 	public Object getProxy(ClassLoader classLoader) {
 		if (logger.isDebugEnabled()) {
 			logger.debug("Creating CGLIB2 proxy: target source is " + this.advised.getTargetSource());
@@ -155,6 +161,7 @@ final class Cglib2AopProxy implements AopProxy, Serializable {
 			Assert.state(rootClass != null, "Target class must be available for creating a CGLIB proxy");
 
 			Class proxySuperClass = rootClass;
+			// 判断是否为代理的类型, 根据className中判断是否包含了"$$"的字符
 			if (AopUtils.isCglibProxyClass(rootClass)) {
 				proxySuperClass = rootClass.getSuperclass();
 				Class[] additionalInterfaces = rootClass.getInterfaces();
@@ -164,9 +171,11 @@ final class Cglib2AopProxy implements AopProxy, Serializable {
 			}
 
 			// Validate the class, writing log messages as necessary.
+			// 这里是验证代理的对象, 按照需要验证输出的日志
 			validateClassIfNecessary(proxySuperClass);
 
 			// Configure CGLIB Enhancer...
+			// 创建并配置Cglib的Enhancer, 这是Enhancer是CGLIB的主要操作类
 			Enhancer enhancer = createEnhancer();
 			if (classLoader != null) {
 				enhancer.setClassLoader(classLoader);
@@ -175,6 +184,7 @@ final class Cglib2AopProxy implements AopProxy, Serializable {
 					enhancer.setUseCache(false);
 				}
 			}
+
 			enhancer.setSuperclass(proxySuperClass);
 			enhancer.setStrategy(new UndeclaredThrowableStrategy(UndeclaredThrowableException.class));
 			enhancer.setInterfaces(AopProxyUtils.completeProxiedInterfaces(this.advised));
@@ -192,6 +202,7 @@ final class Cglib2AopProxy implements AopProxy, Serializable {
 			enhancer.setCallbackTypes(types);
 
 			// Generate the proxy class and create a proxy instance.
+			// 生成代理类, 并创建代理对象
 			Object proxy;
 			if (this.constructorArgs != null) {
 				proxy = enhancer.create(this.constructorArgTypes, this.constructorArgs);
@@ -236,6 +247,7 @@ final class Cglib2AopProxy implements AopProxy, Serializable {
 		if (logger.isWarnEnabled()) {
 			synchronized (validatedClasses) {
 				if (!validatedClasses.containsKey(proxySuperClass)) {
+					// 验证代理的对象类型, 排除父类是Object或者是final的方法
 					doValidateClass(proxySuperClass);
 					validatedClasses.put(proxySuperClass, Boolean.TRUE);
 				}
@@ -257,6 +269,12 @@ final class Cglib2AopProxy implements AopProxy, Serializable {
 		}
 	}
 
+	/**
+	 * 获取回调函数列表
+	 * @param rootClass
+	 * @return
+	 * @throws Exception
+	 */
 	private Callback[] getCallbacks(Class rootClass) throws Exception {
 		// Parameters used for optimisation choices...
 		boolean exposeProxy = this.advised.isExposeProxy();

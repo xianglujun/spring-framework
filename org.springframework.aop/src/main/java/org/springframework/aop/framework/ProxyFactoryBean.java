@@ -99,8 +99,14 @@ public class ProxyFactoryBean extends ProxyCreatorSupport
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
+	/**
+	 * 拦截器名称类表
+	 */
 	private String[] interceptorNames;
-	
+
+	/**
+	 * 目标对象名称, 需要拦截的类
+	 */
 	private String targetName;
 
 	private boolean autodetectInterfaces = true;
@@ -111,6 +117,9 @@ public class ProxyFactoryBean extends ProxyCreatorSupport
 
 	private boolean freezeProxy = false;
 
+	/**
+	 * 默认的类加载器
+	 */
 	private transient ClassLoader proxyClassLoader = ClassUtils.getDefaultClassLoader();
 
 	private transient boolean classLoaderConfigured = false;
@@ -181,7 +190,7 @@ public class ProxyFactoryBean extends ProxyCreatorSupport
 	}
 
 	/**
-	 * Set the value of the singleton property. Governs whether this factory
+	 * Set the value of the singleton property. Governs(治理) whether this factory
 	 * should always return the same proxy instance (which implies the same target)
 	 * or whether it should return a new prototype instance, which implies that
 	 * the target and interceptors may be new instances also, if they are obtained
@@ -223,6 +232,11 @@ public class ProxyFactoryBean extends ProxyCreatorSupport
 		}
 	}
 
+	/**
+	 * 这是一个回调函数, 在bean被创建时, 会回调{@link BeanFactoryAware}方法
+	 * @param beanFactory owning BeanFactory (never <code>null</code>).
+	 * The bean can immediately call methods on the factory.
+	 */
 	public void setBeanFactory(BeanFactory beanFactory) {
 		this.beanFactory = beanFactory;
 		checkInterceptorNames();
@@ -238,6 +252,7 @@ public class ProxyFactoryBean extends ProxyCreatorSupport
 	 */
 	public Object getObject() throws BeansException {
 		initializeAdvisorChain();
+		// 是否已单利模式生成
 		if (isSingleton()) {
 			return getSingletonInstance();
 		}
@@ -297,22 +312,29 @@ public class ProxyFactoryBean extends ProxyCreatorSupport
 
 	/**
 	 * Return the singleton instance of this class's proxy object,
-	 * lazily creating it if it hasn't been created already.
+	 * lazily creating it if it hasn't been created already.(同步调用)
 	 * @return the shared singleton proxy
 	 */
 	private synchronized Object getSingletonInstance() {
+		// 如果单利对象还没有被创建
 		if (this.singletonInstance == null) {
 			this.targetSource = freshTargetSource();
 			if (this.autodetectInterfaces && getProxiedInterfaces().length == 0 && !isProxyTargetClass()) {
 				// Rely on AOP infrastructure to tell us what interfaces to proxy.
+				// 依赖AOP框架来判断需要代理的接口
 				Class targetClass = getTargetClass();
+
+				// 被代理的目标类型不存在
 				if (targetClass == null) {
 					throw new FactoryBeanNotInitializedException("Cannot determine target class for proxy");
 				}
+
+				// 获取当前被代理对象所有的接口, 并添加到接口列表之中
 				setInterfaces(ClassUtils.getAllInterfacesForClass(targetClass, this.proxyClassLoader));
 			}
 			// Initialize the shared singleton instance.
 			super.setFrozen(this.freezeProxy);
+			// 这里会使用ProxyFactory来生成AopProxy对象
 			this.singletonInstance = getProxy(createAopProxy());
 		}
 		return this.singletonInstance;
@@ -418,6 +440,7 @@ public class ProxyFactoryBean extends ProxyCreatorSupport
 			return;
 		}
 
+		// 配置了拦截器列表, 拦截器中主要包括了, Advisor/Advice 的name名称
 		if (!ObjectUtils.isEmpty(this.interceptorNames)) {
 			if (this.beanFactory == null) {
 				throw new IllegalStateException("No BeanFactory available anymore (probably due to serialization) " +
@@ -431,16 +454,20 @@ public class ProxyFactoryBean extends ProxyCreatorSupport
 			}
 
 			// Materialize interceptor chain from bean names.
+			// 这里是对拦截器链的调用, 通过interceptorNames进行调用
 			for (String name : this.interceptorNames) {
 				if (logger.isTraceEnabled()) {
 					logger.trace("Configuring advisor or advice '" + name + "'");
 				}
 
+				// 全局后缀的配置
 				if (name.endsWith(GLOBAL_SUFFIX)) {
 					if (!(this.beanFactory instanceof ListableBeanFactory)) {
 						throw new AopConfigException(
 								"Can only use global advisors or interceptors with a ListableBeanFactory");
 					}
+
+					// 加入通知器
 					addGlobalAdvisor((ListableBeanFactory) this.beanFactory,
 							name.substring(0, name.length() - GLOBAL_SUFFIX.length()));
 				}
@@ -448,6 +475,7 @@ public class ProxyFactoryBean extends ProxyCreatorSupport
 				else {
 					// If we get here, we need to add a named interceptor.
 					// We must check if it's a singleton or prototype.
+					// 如果我们的程序到了这里, 我们需要添加一个拦截器, 但是我们需要判断是singleton
 					Object advice;
 					if (this.singleton || this.beanFactory.isSingleton(name)) {
 						// Add the real Advisor/Advice to the chain.
@@ -458,6 +486,7 @@ public class ProxyFactoryBean extends ProxyCreatorSupport
 						// Avoid unnecessary creation of prototype bean just for advisor chain initialization.
 						advice = new PrototypePlaceholderAdvisor(name);
 					}
+
 					addAdvisorOnChainCreation(advice, name);
 				}
 			}

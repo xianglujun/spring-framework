@@ -80,6 +80,8 @@ public abstract class AopProxyUtils {
 	 */
 	public static Class[] completeProxiedInterfaces(AdvisedSupport advised) {
 		Class[] specifiedInterfaces = advised.getProxiedInterfaces();
+		// 对于接口的代理, 需要判断当前的代理是否是否设置,
+		// 如果代理的接口没有设置, 则默认的获取接口进行设置
 		if (specifiedInterfaces.length == 0) {
 			// No user-specified interfaces: check whether target class is an interface.
 			Class targetClass = advised.getTargetClass();
@@ -87,7 +89,9 @@ public abstract class AopProxyUtils {
 				specifiedInterfaces = new Class[] {targetClass};
 			}
 		}
+		// 判断是否需要代理SpringProxy
 		boolean addSpringProxy = !advised.isInterfaceProxied(SpringProxy.class);
+		// 判断是否代理了Advised接口
 		boolean addAdvised = !advised.isOpaque() && !advised.isInterfaceProxied(Advised.class);
 		int nonUserIfcCount = 0;
 		if (addSpringProxy) {
@@ -98,9 +102,11 @@ public abstract class AopProxyUtils {
 		}
 		Class[] proxiedInterfaces = new Class[specifiedInterfaces.length + nonUserIfcCount];
 		System.arraycopy(specifiedInterfaces, 0, proxiedInterfaces, 0, specifiedInterfaces.length);
+		// 如果没有手工设置SpringProxy，则需要加入
 		if (addSpringProxy) {
 			proxiedInterfaces[specifiedInterfaces.length] = SpringProxy.class;
 		}
+		// 如果没有设置Advised，则设置Adviced
 		if (addAdvised) {
 			proxiedInterfaces[proxiedInterfaces.length - 1] = Advised.class;
 		}

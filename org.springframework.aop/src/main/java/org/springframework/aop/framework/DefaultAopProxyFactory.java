@@ -48,11 +48,18 @@ import org.springframework.util.ClassUtils;
  */
 public class DefaultAopProxyFactory implements AopProxyFactory, Serializable {
 
-	/** Whether the CGLIB2 library is present on the classpath */
+	/** Whether the CGLIB2 library is present on the classpath, 动态监测是否加载了cglib的包, 通过加载对应的class对象来判断 */
 	private static final boolean cglibAvailable =
 			ClassUtils.isPresent("net.sf.cglib.proxy.Enhancer", DefaultAopProxyFactory.class.getClassLoader());
 
 
+	/**
+	 * 创建AopProxy对象的具体实现
+	 * @param config the AOP configuration in the form of an
+	 * AdvisedSupport object
+	 * @return
+	 * @throws AopConfigException
+	 */
 	public AopProxy createAopProxy(AdvisedSupport config) throws AopConfigException {
 		if (config.isOptimize() || config.isProxyTargetClass() || hasNoUserSuppliedProxyInterfaces(config)) {
 			Class targetClass = config.getTargetClass();
@@ -60,14 +67,18 @@ public class DefaultAopProxyFactory implements AopProxyFactory, Serializable {
 				throw new AopConfigException("TargetSource cannot determine target class: " +
 						"Either an interface or a target is required for proxy creation.");
 			}
+			// 如果代理的类型是接口, 则采用JDK的方式来做代理
 			if (targetClass.isInterface()) {
 				return new JdkDynamicAopProxy(config);
 			}
+
+			// 如果classpath中没有引入cglib的
 			if (!cglibAvailable) {
 				throw new AopConfigException(
 						"Cannot proxy target class because CGLIB2 is not available. " +
 						"Add CGLIB to the class path or specify proxy interfaces.");
 			}
+			// 其他情况, 则使用cglib来进行创建
 			return CglibProxyFactory.createCglibProxy(config);
 		}
 		else {

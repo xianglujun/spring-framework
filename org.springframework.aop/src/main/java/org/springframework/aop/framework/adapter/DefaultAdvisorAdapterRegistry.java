@@ -59,11 +59,15 @@ public class DefaultAdvisorAdapterRegistry implements AdvisorAdapterRegistry, Se
 		if (!(adviceObject instanceof Advice)) {
 			throw new UnknownAdviceTypeException(adviceObject);
 		}
+
 		Advice advice = (Advice) adviceObject;
 		if (advice instanceof MethodInterceptor) {
 			// So well-known it doesn't even need an adapter.
 			return new DefaultPointcutAdvisor(advice);
 		}
+
+		// 这里主要是判断当前的Advisor是否能被支持
+		// 现在主要包括了BeforeAdvice, AfterAdvice, ThrowAdvice三种类型
 		for (AdvisorAdapter adapter : this.adapters) {
 			// Check that it is supported.
 			if (adapter.supportsAdvice(advice)) {
