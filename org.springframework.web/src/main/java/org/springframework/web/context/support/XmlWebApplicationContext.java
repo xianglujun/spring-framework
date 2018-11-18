@@ -22,6 +22,7 @@ import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.xml.ResourceEntityResolver;
 import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
+import org.springframework.context.support.AbstractApplicationContext;
 
 /**
  * {@link org.springframework.web.context.WebApplicationContext} implementation
@@ -62,17 +63,28 @@ import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
 public class XmlWebApplicationContext extends AbstractRefreshableWebApplicationContext {
 
 	/** Default config location for the root context */
+	/**
+	 * 默认的配置文件存储的路径, 如果不单独的指定文件的路径, 则会从这里去读取文件
+	 */
 	public static final String DEFAULT_CONFIG_LOCATION = "/WEB-INF/applicationContext.xml";
 
 	/** Default prefix for building a config location for a namespace */
+	/**
+	 * 默认配置文件所在的路径, 默认都放在/WEB-INF之下
+	 */
 	public static final String DEFAULT_CONFIG_LOCATION_PREFIX = "/WEB-INF/";
 
 	/** Default suffix for building a config location for a namespace */
+	/**
+	 * 默认配置文件的后缀名称
+	 */
 	public static final String DEFAULT_CONFIG_LOCATION_SUFFIX = ".xml";
 
 
 	/**
 	 * Loads the bean definitions via an XmlBeanDefinitionReader.
+	 * 这里又看到了熟悉的加载过程，这个方法会在{@link AbstractApplicationContext#refresh()}模板方法中被调用
+	 *
 	 * @see org.springframework.beans.factory.xml.XmlBeanDefinitionReader
 	 * @see #initBeanDefinitionReader
 	 * @see #loadBeanDefinitions
@@ -80,16 +92,21 @@ public class XmlWebApplicationContext extends AbstractRefreshableWebApplicationC
 	@Override
 	protected void loadBeanDefinitions(DefaultListableBeanFactory beanFactory) throws BeansException, IOException {
 		// Create a new XmlBeanDefinitionReader for the given BeanFactory.
+		// 对于当前的容器来讲, 都是使用XmlBeanDefintiionReader的方式来加载BeanDefinitions
 		XmlBeanDefinitionReader beanDefinitionReader = new XmlBeanDefinitionReader(beanFactory);
 
 		// Configure the bean definition reader with this context's
 		// resource loading environment.
+		// 这里配置默认的资源加载的环境,
 		beanDefinitionReader.setResourceLoader(this);
 		beanDefinitionReader.setEntityResolver(new ResourceEntityResolver(this));
 
 		// Allow a subclass to provide custom initialization of the reader,
 		// then proceed with actually loading the bean definitions.
+		// 这里允许子类为BeanDefintionReader设置比较的初始化的参数
 		initBeanDefinitionReader(beanDefinitionReader);
+
+		// 通过BeanDefinitionReader加载BeanDefinitions
 		loadBeanDefinitions(beanDefinitionReader);
 	}
 
@@ -118,6 +135,7 @@ public class XmlWebApplicationContext extends AbstractRefreshableWebApplicationC
 	 * @see #getResourcePatternResolver
 	 */
 	protected void loadBeanDefinitions(XmlBeanDefinitionReader reader) throws IOException {
+		// 如果有多个配置文件, 会轮询的加载BeanDefintion, 都是通过BeanDefinitionReader来完成的
 		String[] configLocations = getConfigLocations();
 		if (configLocations != null) {
 			for (String configLocation : configLocations) {
@@ -130,6 +148,10 @@ public class XmlWebApplicationContext extends AbstractRefreshableWebApplicationC
 	 * The default location for the root context is "/WEB-INF/applicationContext.xml",
 	 * and "/WEB-INF/test-servlet.xml" for a context with the namespace "test-servlet"
 	 * (like for a DispatcherServlet instance with the servlet-name "test").
+	 *
+	 * 这里会根据namespace加载对应的xml的配置文件, 主要依据的是servlet-name的配置信息，如果没有配置,
+	 * 则会采用"/WEB-INF/applicationContext.xml"路径的方式来加载配置文件
+	 *
 	 */
 	@Override
 	protected String[] getDefaultConfigLocations() {

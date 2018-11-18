@@ -40,10 +40,12 @@ public class ContextLoaderListener extends ContextLoader implements ServletConte
 	 * Initialize the root web application context.
 	 */
 	public void contextInitialized(ServletContextEvent event) {
+		// 因为该类本身就是ContextLoader的子类, 因此可以直接使用本身进行创建
 		this.contextLoader = createContextLoader();
 		if (this.contextLoader == null) {
 			this.contextLoader = this;
 		}
+		// 具体的工作交由给ContextLoader来实现, 创建WebApplicationContext的容器实例
 		this.contextLoader.initWebApplicationContext(event.getServletContext());
 	}
 
