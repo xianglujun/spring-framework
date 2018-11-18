@@ -22,7 +22,7 @@ package org.springframework.aop;
  * advice chooses to end the interceptor chain itself.
  *
  * <p>If a <code>TargetSource</code> is "static", it will always return
- * the same target, allowing optimizations in the AOP framework. Dynamic
+ * the same target, allowing optimizations(优化) in the AOP framework. Dynamic
  * target sources can support pooling, hot swapping, etc.
  *
  * <p>Application developers don't usually need to work with

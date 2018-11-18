@@ -45,14 +45,21 @@ import org.springframework.aop.support.MethodMatchers;
  */
 public class DefaultAdvisorChainFactory implements AdvisorChainFactory, Serializable {
 
+	/**
+	 * 这里获取拦截器列表以及动态拦截通知
+	 * @param config the AOP configuration in the form of an Advised object
+	 * @param method the proxied method
+	 * @param targetClass the target class
+	 * @return
+	 */
 	public List<Object> getInterceptorsAndDynamicInterceptionAdvice(
 			Advised config, Method method, Class targetClass) {
 
 		// This is somewhat tricky... we have to process introductions first,
-		// but we need to preserve order in the ultimate list.
+		// but we need to preserve(保存,保护, 维持) order in the ultimate(最终的, 根本的) list.
 		List<Object> interceptorList = new ArrayList<Object>(config.getAdvisors().length);
 
-		// 对拦截的类进行过滤
+		// 根据IntroductionAdvisor对targetClass进行过滤，判断是否被introductions过滤
 		boolean hasIntroductions = hasMatchingIntroductions(config, targetClass);
 
 		AdvisorAdapterRegistry registry = GlobalAdvisorAdapterRegistry.getInstance();
@@ -66,8 +73,11 @@ public class DefaultAdvisorChainFactory implements AdvisorChainFactory, Serializ
 				// 匹配Class
 				if (config.isPreFiltered() || pointcutAdvisor.getPointcut().getClassFilter().matches(targetClass)) {
 
+					// 获取当前advisor能够支持的Interceptor列表
 					MethodInterceptor[] interceptors = registry.getInterceptors(advisor);
 					MethodMatcher mm = pointcutAdvisor.getPointcut().getMethodMatcher();
+
+					// 判断是否支持拦截的方法
 					if (MethodMatchers.matches(mm, method, targetClass, hasIntroductions)) {
 						if (mm.isRuntime()) {
 							// Creating a new object instance in the getInterceptors() method
@@ -82,6 +92,7 @@ public class DefaultAdvisorChainFactory implements AdvisorChainFactory, Serializ
 					}
 				}
 			}
+			// 如果是IntroductionAdvisor通知器
 			else if (advisor instanceof IntroductionAdvisor) {
 				IntroductionAdvisor ia = (IntroductionAdvisor) advisor;
 				if (config.isPreFiltered() || ia.getClassFilter().matches(targetClass)) {
@@ -99,6 +110,7 @@ public class DefaultAdvisorChainFactory implements AdvisorChainFactory, Serializ
 
 	/**
 	 * Determine whether the Advisors contain matching introductions.
+	 * 该方法用于在通知器列表中, 判断是否包含了{@link IntroductionAdvisor}通知器, 如果包含了, 判断{@code targetClass}是否能够被匹配。
 	 */
 	private static boolean hasMatchingIntroductions(Advised config, Class targetClass) {
 		for (int i = 0; i < config.getAdvisors().length; i++) {

@@ -606,6 +606,15 @@ final class Cglib2AopProxy implements AopProxy, Serializable {
 			this.advised = advised;
 		}
 
+		/**
+		 * 具体实现拦截的地方
+		 * @param proxy
+		 * @param method
+		 * @param args
+		 * @param methodProxy
+		 * @return
+		 * @throws Throwable
+		 */
 		public Object intercept(Object proxy, Method method, Object[] args, MethodProxy methodProxy) throws Throwable {
 			Object oldProxy = null;
 			boolean setProxyContext = false;
@@ -617,16 +626,20 @@ final class Cglib2AopProxy implements AopProxy, Serializable {
 					oldProxy = AopContext.setCurrentProxy(proxy);
 					setProxyContext = true;
 				}
+
 				// May be <code>null</code>. Get as late as possible to minimize the time we
 				// "own" the target, in case it comes from a pool.
 				target = getTarget();
 				if (target != null) {
 					targetClass = target.getClass();
 				}
+
+				// 获取拦截器链
 				List<Object> chain = this.advised.getInterceptorsAndDynamicInterceptionAdvice(method, targetClass);
 				Object retVal;
 				// Check whether we only have one InvokerInterceptor: that is,
 				// no real advice, but just reflective invocation of the target.
+				// 如果没有拦截器通知, 则直接调用代理对象的世纪方法
 				if (chain.isEmpty() && Modifier.isPublic(method.getModifiers())) {
 					// We can skip creating a MethodInvocation: just invoke the target directly.
 					// Note that the final invoker must be an InvokerInterceptor, so we know
@@ -636,6 +649,7 @@ final class Cglib2AopProxy implements AopProxy, Serializable {
 				}
 				else {
 					// We need to create a method invocation...
+					// 通过CglibMethodInvocation来执行拦截器的方法
 					retVal = new CglibMethodInvocation(proxy, target, method, args, targetClass, chain, methodProxy).proceed();
 				}
 				retVal = massageReturnTypeIfNecessary(proxy, target, method, retVal);
@@ -694,15 +708,17 @@ final class Cglib2AopProxy implements AopProxy, Serializable {
 		}
 
 		/**
-		 * Gives a marginal performance improvement versus using reflection to
+		 * Gives a marginal(边缘的, 临界的) performance improvement versus using reflection to
 		 * invoke the target when invoking public methods.
 		 */
 		@Override
 		protected Object invokeJoinpoint() throws Throwable {
+			// 从这里表明, 如果是protected方法, 则交由反射执行
 			if (this.protectedMethod) {
 				return super.invokeJoinpoint();
 			}
 			else {
+				// 其他情况交由cglib执行
 				return this.methodProxy.invoke(this.target, this.arguments);
 			}
 		}

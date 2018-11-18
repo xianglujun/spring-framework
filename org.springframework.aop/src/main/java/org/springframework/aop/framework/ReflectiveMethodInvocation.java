@@ -143,26 +143,38 @@ public class ReflectiveMethodInvocation implements ProxyMethodInvocation, Clonea
 		this.arguments = arguments;
 	}
 
-
+	/**
+	 * 具体执行拦截器和目标对象方法的地方:
+	 * <br/>
+	 * 这个方法实际上是一个递归的方法, 当在执行Interceptor的invoke的方法的时候, 实际上是需要传入{@link MethodInvocation}
+	 * , 当在最终执行完成Interceptor的方法后, 会继续调用{@link #proceed()}方法完成递归, 以及拦截器链上的拦截器的调用
+	 * @return
+	 * @throws Throwable
+	 */
 	public Object proceed() throws Throwable {
 		//	We start with an index of -1 and increment early.
+		// 如果没有拦截器, 则直接执行目标方法
 		if (this.currentInterceptorIndex == this.interceptorsAndDynamicMethodMatchers.size() - 1) {
 			return invokeJoinpoint();
 		}
 
+		// 这里验证定义好的调用器链进行调用
 		Object interceptorOrInterceptionAdvice =
 		    this.interceptorsAndDynamicMethodMatchers.get(++this.currentInterceptorIndex);
 		if (interceptorOrInterceptionAdvice instanceof InterceptorAndDynamicMethodMatcher) {
 			// Evaluate dynamic method matcher here: static part will already have
 			// been evaluated and found to match.
+			// 这类对拦截器进行动态的判断, 这里会发MethodMatcher的匹配的操作, 如果匹配成功, 则执行拦截器
 			InterceptorAndDynamicMethodMatcher dm =
 			    (InterceptorAndDynamicMethodMatcher) interceptorOrInterceptionAdvice;
+			// 方法匹配成功, 则执行拦截器
 			if (dm.methodMatcher.matches(this.method, this.targetClass, this.arguments)) {
 				return dm.interceptor.invoke(this);
 			}
 			else {
 				// Dynamic matching failed.
 				// Skip this interceptor and invoke the next in the chain.
+				// 如果不匹配则则会递归调用
 				return proceed();
 			}
 		}

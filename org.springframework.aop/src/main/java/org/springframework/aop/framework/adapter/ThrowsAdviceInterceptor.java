@@ -74,13 +74,16 @@ public class ThrowsAdviceInterceptor implements MethodInterceptor, AfterAdvice {
 		Assert.notNull(throwsAdvice, "Advice must not be null");
 		this.throwsAdvice = throwsAdvice;
 
+		// 配置ThrowAdivce的回调方法
 		Method[] methods = throwsAdvice.getClass().getMethods();
 		for (Method method : methods) {
+			// 找到afterThrowing方法, 该方法必须有1个参数或者4个参数, 并且最后一个参数为异常类型
 			if (method.getName().equals(AFTER_THROWING) &&
 					(method.getParameterTypes().length == 1 || method.getParameterTypes().length == 4) &&
 					Throwable.class.isAssignableFrom(method.getParameterTypes()[method.getParameterTypes().length - 1])
 				) {
 				// Have an exception handler
+				// 配置异常处理器
 				this.exceptionHandlerMap.put(method.getParameterTypes()[method.getParameterTypes().length - 1], method);
 				if (logger.isDebugEnabled()) {
 					logger.debug("Found exception handler method: " + method);
@@ -131,13 +134,22 @@ public class ThrowsAdviceInterceptor implements MethodInterceptor, AfterAdvice {
 			throw ex;
 		}
 	}
-	
+
+	/**
+	 * 执行处理方法, 通过反射对{@link org.springframework.aop.ThrowsAdvice}的方法进行回调
+	 * @param mi 方法执行, 代表了代理的方法执行对象, 默认的为{@link org.springframework.aop.framework.ReflectiveMethodInvocation}
+	 * @param ex 方法执行是抛出的异常
+	 * @param method 最终处理的方法
+	 * @throws Throwable
+	 */
 	private void invokeHandlerMethod(MethodInvocation mi, Throwable ex, Method method) throws Throwable {
 		Object[] handlerArgs;
+		// 如果方法有一个参数， 则直接传入异常
 		if (method.getParameterTypes().length == 1) {
 			handlerArgs = new Object[] { ex };
 		}
 		else {
+			// 如果方法有四个异常, 则对应的为执行的方法, 方法的参数, 方法所属的对象, 以及对应的异常对象
 			handlerArgs = new Object[] {mi.getMethod(), mi.getArguments(), mi.getThis(), ex};
 		}
 		try {
