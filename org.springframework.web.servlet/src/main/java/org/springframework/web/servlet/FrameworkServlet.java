@@ -311,7 +311,8 @@ public abstract class FrameworkServlet extends HttpServletBean {
 
 	/**
 	 * Overridden method of {@link HttpServletBean}, invoked after any bean properties
-	 * have been set. Creates this servlet's WebApplicationContext.
+	 * have been set. Creates this servlet's WebApplicationContext. 这个方式在Servlet初始化的时候由{@link HttpServletBean}
+	 * 的{@link #init()}进行调用, 从Spring的设计上将, init充当了一个模板的方法
 	 */
 	@Override
 	protected final void initServletBean() throws ServletException {
@@ -322,6 +323,7 @@ public abstract class FrameworkServlet extends HttpServletBean {
 		long startTime = System.currentTimeMillis();
 
 		try {
+			// 这里初始化上下文
 			this.webApplicationContext = initWebApplicationContext();
 			initFrameworkServlet();
 		}
@@ -353,8 +355,11 @@ public abstract class FrameworkServlet extends HttpServletBean {
 		WebApplicationContext wac = findWebApplicationContext();
 		if (wac == null) {
 			// No fixed context defined for this servlet - create a local one.
+			// 这里从ServletContext获取根上下文
 			WebApplicationContext parent =
 					WebApplicationContextUtils.getWebApplicationContext(getServletContext());
+
+			// 创建上下文
 			wac = createWebApplicationContext(parent);
 		}
 
@@ -366,6 +371,8 @@ public abstract class FrameworkServlet extends HttpServletBean {
 
 		if (this.publishContext) {
 			// Publish the context as a servlet context attribute.
+			// 这里是将当前的Servlet的ApplicationContext绑定到ServletContext中,
+			// 这里是将当前Servlet的servlet-name属性作为区分的标准。
 			String attrName = getServletContextAttributeName();
 			getServletContext().setAttribute(attrName, wac);
 			if (this.logger.isDebugEnabled()) {
@@ -392,6 +399,7 @@ public abstract class FrameworkServlet extends HttpServletBean {
 		if (attrName == null) {
 			return null;
 		}
+		// 获取已经被初始化的ROO的WebApplicationContext
 		WebApplicationContext wac =
 				WebApplicationContextUtils.getWebApplicationContext(getServletContext(), attrName);
 		if (wac == null) {
@@ -428,6 +436,9 @@ public abstract class FrameworkServlet extends HttpServletBean {
 					"': custom WebApplicationContext class [" + contextClass.getName() +
 					"] is not of type ConfigurableWebApplicationContext");
 		}
+
+		// 实例化需要的具体上下文, 并为这个上下文配置属性, 在该Servlet中, 默认采用了XmlWebApplicationContext
+		// 的进行初始化
 		ConfigurableWebApplicationContext wac =
 				(ConfigurableWebApplicationContext) BeanUtils.instantiateClass(contextClass);
 
@@ -456,14 +467,23 @@ public abstract class FrameworkServlet extends HttpServletBean {
 			}
 		}
 
+		// 设置父容器
 		wac.setParent(parent);
+		// 设置ServletContext
 		wac.setServletContext(getServletContext());
+		// 设置ServletConfig的信息
 		wac.setServletConfig(getServletConfig());
+		// 获取命名空间
 		wac.setNamespace(getNamespace());
+		// 设置配置文件的路径
 		wac.setConfigLocation(getContextConfigLocation());
+
+		// 设置容器监听器
 		wac.addApplicationListener(new SourceFilteringListener(wac, new ContextRefreshListener()));
 
+		// 初始化容器之后, 执行的操作
 		postProcessWebApplicationContext(wac);
+		// 执行容器的刷新操作
 		wac.refresh();
 
 		return wac;
@@ -482,7 +502,7 @@ public abstract class FrameworkServlet extends HttpServletBean {
 	protected WebApplicationContext createWebApplicationContext(WebApplicationContext parent) {
 		return createWebApplicationContext((ApplicationContext) parent);
 	}
-	
+
 	/**
 	 * Post-process the given WebApplicationContext before it is refreshed
 	 * and activated as context for this servlet.

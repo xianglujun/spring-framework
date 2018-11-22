@@ -69,6 +69,9 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping {
 
 	private boolean lazyInitHandlers = false;
 
+	/**
+	 * 这是存储URL与handler的关系映射的对象, 用于处理url的映射与controller的路径
+	 */
 	private final Map<String, Object> handlerMap = new LinkedHashMap<String, Object>();
 
 	private MappedInterceptors mappedInterceptors;
@@ -181,18 +184,27 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping {
 	 */
 	@Override
 	protected Object getHandlerInternal(HttpServletRequest request) throws Exception {
+		// 从request中获取请求的路径
 		String lookupPath = this.urlPathHelper.getLookupPathForRequest(request);
+
+		// 根据url与handler的绑定关系, 获取处理当前url的绑定关系, 如果没有对应的handler，则返回Null
 		Object handler = lookupHandler(lookupPath, request);
+
 		if (handler == null) {
 			// We need to care for the default handler directly, since we need to
 			// expose the PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE for it as well.
+
+			// 这里需要注意的是对默认handler的处理
 			Object rawHandler = null;
 			if ("/".equals(lookupPath)) {
 				rawHandler = getRootHandler();
 			}
+
+			// 如果RootHandler没有设置, 则使用defaultHandler来进行处理
 			if (rawHandler == null) {
 				rawHandler = getDefaultHandler();
 			}
+
 			if (rawHandler != null) {
 				// Bean name or resolved handler?
 				if (rawHandler instanceof String) {
@@ -203,6 +215,8 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping {
 				handler = buildPathExposingHandler(rawHandler, lookupPath, lookupPath, null);
 			}
 		}
+
+		// 这里会对interceptor的拦截器进行处理
 		if (handler != null && this.mappedInterceptors != null) {
 			Set<HandlerInterceptor> mappedInterceptors =
 					this.mappedInterceptors.getInterceptors(lookupPath, this.pathMatcher);
@@ -214,6 +228,8 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping {
 				else {
 					chain = new HandlerExecutionChain(handler);
 				}
+
+				// 项HandlerExecutionChain中新增Interceptor
 				chain.addInterceptors(mappedInterceptors.toArray(new HandlerInterceptor[mappedInterceptors.size()]));
 			}
 		}
@@ -248,16 +264,20 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping {
 				String handlerName = (String) handler;
 				handler = getApplicationContext().getBean(handlerName);
 			}
+			// 验证handler信息
 			validateHandler(handler, request);
 			return buildPathExposingHandler(handler, urlPath, urlPath, null);
 		}
+
 		// Pattern match?
 		List<String> matchingPatterns = new ArrayList<String>();
+		// 遍历所有的url, 根据匹配规则进行匹配
 		for (String registeredPattern : this.handlerMap.keySet()) {
 			if (getPathMatcher().match(registeredPattern, urlPath)) {
 				matchingPatterns.add(registeredPattern);
 			}
 		}
+
 		String bestPatternMatch = null;
 		Comparator<String> patternComparator = getPathMatcher().getPatternComparator(urlPath);
 		if (!matchingPatterns.isEmpty()) {
@@ -267,6 +287,7 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping {
 			}
 			bestPatternMatch = matchingPatterns.get(0);
 		}
+
 		if (bestPatternMatch != null) {
 			handler = this.handlerMap.get(bestPatternMatch);
 			// Bean name or resolved handler?
@@ -365,6 +386,9 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping {
 
 	/**
 	 * Register the specified handler for the given URL path.
+	 *
+	 * 注册url与handler之间的映射关系
+	 *
 	 * @param urlPath the URL the bean should be mapped to
 	 * @param handler the handler instance or handler bean name String
 	 * (a bean name will automatically be resolved into the corresponding handler bean)
@@ -377,13 +401,17 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping {
 		Object resolvedHandler = handler;
 
 		// Eagerly resolve handler if referencing singleton via name.
+		// 实时的解决handler的引用, 并且通过bean name的方式获取handler的实例
 		if (!this.lazyInitHandlers && handler instanceof String) {
 			String handlerName = (String) handler;
+			// 如果是单例的对象, 获取单例的对象
 			if (getApplicationContext().isSingleton(handlerName)) {
 				resolvedHandler = getApplicationContext().getBean(handlerName);
 			}
 		}
 
+		// 这里可以看见, 同一个url只能有一个handler的实现, 如果有多个的
+		// 映射关系, 则抛出错误
 		Object mappedHandler = this.handlerMap.get(urlPath);
 		if (mappedHandler != null) {
 			if (mappedHandler != resolvedHandler) {
@@ -393,12 +421,15 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping {
 			}
 		}
 		else {
+			// 这里是处理"/"的url链接,会将当前controller 的handler设置为rootHandler
 			if (urlPath.equals("/")) {
 				if (logger.isInfoEnabled()) {
 					logger.info("Root mapping to " + getHandlerDescription(handler));
 				}
 				setRootHandler(resolvedHandler);
 			}
+			// 这里是处理"/*", 将当前的handler设置为defaultHandler的值
+			// defaultHandler用于处理在无法匹配到指定的url的时候, 采用的默认的策略
 			else if (urlPath.equals("/*")) {
 				if (logger.isInfoEnabled()) {
 					logger.info("Default mapping to " + getHandlerDescription(handler));
@@ -406,6 +437,7 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping {
 				setDefaultHandler(resolvedHandler);
 			}
 			else {
+				// 处理正常的URL映射关系, 设置key和value的值, 分别对应的URL和controller(handler)
 				this.handlerMap.put(urlPath, resolvedHandler);
 				if (logger.isInfoEnabled()) {
 					logger.info("Mapped URL path [" + urlPath + "] onto " + getHandlerDescription(handler));

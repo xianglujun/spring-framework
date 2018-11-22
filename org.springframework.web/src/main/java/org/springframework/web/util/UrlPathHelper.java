@@ -57,6 +57,9 @@ public class UrlPathHelper {
 
 	private boolean urlDecode = true;
 
+	/**
+	 * 在容器中, 默认使用"ISO-8859-1"作为字符解码
+	 */
 	private String defaultEncoding = WebUtils.DEFAULT_CHARACTER_ENCODING;
 
 

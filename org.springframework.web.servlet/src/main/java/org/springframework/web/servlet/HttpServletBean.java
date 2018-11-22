@@ -111,11 +111,18 @@ public abstract class HttpServletBean extends HttpServlet {
 
 		// Set bean properties from init parameters.
 		try {
+
+			// 获取Servlet的参数, 并未Bean设置必要的参数
 			PropertyValues pvs = new ServletConfigPropertyValues(getServletConfig(), this.requiredProperties);
+
+			// 这里创建了一个BeanWrapperImpl的实例
 			BeanWrapper bw = PropertyAccessorFactory.forBeanPropertyAccess(this);
 			ResourceLoader resourceLoader = new ServletContextResourceLoader(getServletContext());
 			bw.registerCustomEditor(Resource.class, new ResourceEditor(resourceLoader));
+			// 这里是调用初始化的一个方法, 可以在子类重写, 设置必要的参数
 			initBeanWrapper(bw);
+
+			// 设置配置成参数
 			bw.setPropertyValues(pvs, true);
 		}
 		catch (BeansException ex) {
@@ -124,6 +131,7 @@ public abstract class HttpServletBean extends HttpServlet {
 		}
 
 		// Let subclasses do whatever initialization they like.
+		// 这里是一个hook方法, 子类能够重写, 并完成初始化信息
 		initServletBean();
 
 		if (logger.isDebugEnabled()) {

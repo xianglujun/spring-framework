@@ -54,6 +54,7 @@ public class HandlerExecutionChain {
 	 * (in the given order) before the handler itself executes
 	 */
 	public HandlerExecutionChain(Object handler, HandlerInterceptor[] interceptors) {
+		// 如果传入的handler是HandlerExecutionChain， 会做一个深度的拷贝
 		if (handler instanceof HandlerExecutionChain) {
 			HandlerExecutionChain originalChain = (HandlerExecutionChain) handler;
 			this.handler = originalChain.getHandler();

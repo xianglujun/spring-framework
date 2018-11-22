@@ -30,7 +30,7 @@ import javax.servlet.http.HttpServletRequest;
  *
  * <p>HandlerMapping implementations can support mapped interceptors but do not
  * have to. A handler will always be wrapped in a {@link HandlerExecutionChain}
- * instance, optionally accompanied by some {@link HandlerInterceptor} instances.
+ * instance, optionally accompanied(伴随) by some {@link HandlerInterceptor} instances.
  * The DispatcherServlet will first call each HandlerInterceptor's
  * <code>preHandle</code> method in the given order, finally invoking the handler
  * itself if all <code>preHandle</code> methods have returned <code>true</code>.
@@ -94,6 +94,10 @@ public interface HandlerMapping {
 	 * <p>Returns <code>null</code> if no match was found. This is not an error.
 	 * The DispatcherServlet will query all registered HandlerMapping beans to find
 	 * a match, and only decide there is an error if none can find a handler.
+	 *
+	 * 这里调用{@link #getHandler(HttpServletRequest)}方法实际上返回的是一个{@link HandlerExecutionChain}的对象,
+	 * 这个对象中不仅包含了{@link HandlerMapping}的本身, 同时又包含了http interceptor的执行
+	 *
 	 * @param request current HTTP request
 	 * @return a HandlerExecutionChain instance containing handler object and
 	 * any interceptors, or <code>null</code> if no mapping found

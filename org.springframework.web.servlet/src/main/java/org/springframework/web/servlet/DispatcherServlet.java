@@ -333,6 +333,7 @@ public class DispatcherServlet extends FrameworkServlet {
 	 * <p>May be overridden in subclasses in order to initialize further strategy objects.
 	 */
 	protected void initStrategies(ApplicationContext context) {
+		// 这里初始化MultipartResovler的实例
 		initMultipartResolver(context);
 		initLocaleResolver(context);
 		initThemeResolver(context);
@@ -418,6 +419,8 @@ public class DispatcherServlet extends FrameworkServlet {
 	private void initHandlerMappings(ApplicationContext context) {
 		this.handlerMappings = null;
 
+		// 这里导入会加载所有的HandlerMapping的bean，这些bean可能会存在与当前的ApplicationContext中，也可以存在于
+		// ROOT的容器中。 detectAllHandlerMappers默认值为true，表示会从父容器中也去查找对应的Bean的对象
 		if (this.detectAllHandlerMappings) {
 			// Find all HandlerMappings in the ApplicationContext, including ancestor contexts.
 			Map<String, HandlerMapping> matchingBeans =
@@ -430,6 +433,7 @@ public class DispatcherServlet extends FrameworkServlet {
 		}
 		else {
 			try {
+			  // 如果不自动的探测HandlerMapping, 则根据名称从当前的容器中获取对应的对象(handlerMapping)
 				HandlerMapping hm = context.getBean(HANDLER_MAPPING_BEAN_NAME, HandlerMapping.class);
 				this.handlerMappings = Collections.singletonList(hm);
 			}
@@ -440,7 +444,9 @@ public class DispatcherServlet extends FrameworkServlet {
 
 		// Ensure we have at least one HandlerMapping, by registering
 		// a default HandlerMapping if no other mappings are found.
+    // 如果容器中没有配置任何的HandlerMapping的值, 则默认从DispatcherServlet.properties的文件中读取
 		if (this.handlerMappings == null) {
+		  // 从默认的文件中获取HandlerMapping的配置
 			this.handlerMappings = getDefaultStrategies(context, HandlerMapping.class);
 			if (logger.isDebugEnabled()) {
 				logger.debug("No HandlerMappings found in servlet '" + getServletName() + "': using default");
@@ -456,6 +462,8 @@ public class DispatcherServlet extends FrameworkServlet {
 	private void initHandlerAdapters(ApplicationContext context) {
 		this.handlerAdapters = null;
 
+		// 这里默认的获取所有的HandlerMapping的对象,
+    // 这里的detectAllHandlerAdapters默认的true, 表示从所有的容器中获取所有的HnadlerMapping的对象
 		if (this.detectAllHandlerAdapters) {
 			// Find all HandlerAdapters in the ApplicationContext, including ancestor contexts.
 			Map<String, HandlerAdapter> matchingBeans =
@@ -468,6 +476,7 @@ public class DispatcherServlet extends FrameworkServlet {
 		}
 		else {
 			try {
+			  // 可以根据名称从当前的ApplicationContext容器中加载HandlerAdapter的
 				HandlerAdapter ha = context.getBean(HANDLER_ADAPTER_BEAN_NAME, HandlerAdapter.class);
 				this.handlerAdapters = Collections.singletonList(ha);
 			}
@@ -640,6 +649,7 @@ public class DispatcherServlet extends FrameworkServlet {
 	 */
 	@SuppressWarnings("unchecked")
 	protected <T> List<T> getDefaultStrategies(ApplicationContext context, Class<T> strategyInterface) {
+	  // 获取对应的策略的名称
 		String key = strategyInterface.getName();
 		String value = defaultStrategies.getProperty(key);
 		if (value != null) {
@@ -648,6 +658,7 @@ public class DispatcherServlet extends FrameworkServlet {
 			for (String className : classNames) {
 				try {
 					Class clazz = ClassUtils.forName(className, DispatcherServlet.class.getClassLoader());
+					// 创建策略中配置的类名到容器之中
 					Object strategy = createDefaultStrategy(context, clazz);
 					strategies.add((T) strategy);
 				}
@@ -696,7 +707,9 @@ public class DispatcherServlet extends FrameworkServlet {
 
 		// Keep a snapshot of the request attributes in case of an include,
 		// to be able to restore the original attributes after the include.
+		// 对http请求参数进行快照处理
 		Map<String, Object> attributesSnapshot = null;
+		// 这里主要判断是否为未定层请求, 通过判断Request中的属性是否包含了某一特定的值
 		if (WebUtils.isIncludeRequest(request)) {
 			logger.debug("Taking snapshot of request attributes before include");
 			attributesSnapshot = new HashMap<String, Object>();
@@ -710,12 +723,14 @@ public class DispatcherServlet extends FrameworkServlet {
 		}
 
 		// Make framework objects available to handlers and view objects.
+		// 这里主要是
 		request.setAttribute(WEB_APPLICATION_CONTEXT_ATTRIBUTE, getWebApplicationContext());
 		request.setAttribute(LOCALE_RESOLVER_ATTRIBUTE, this.localeResolver);
 		request.setAttribute(THEME_RESOLVER_ATTRIBUTE, this.themeResolver);
 		request.setAttribute(THEME_SOURCE_ATTRIBUTE, getThemeSource());
 
 		try {
+			// 这里是对请求的分发接口
 			doDispatch(request, response);
 		}
 		finally {
@@ -743,23 +758,28 @@ public class DispatcherServlet extends FrameworkServlet {
 		int interceptorIndex = -1;
 
 		try {
+			// 这里为视图准备一个ModelAndView的对象, 这个ModelAndView持有handler的执行结果
 			ModelAndView mv;
 			boolean errorView = false;
 
 			try {
+				// 这里主要是判断是否为上传请求
 				processedRequest = checkMultipart(request);
 
 				// Determine handler for the current request.
+				// 根据请求获取对应的handler对象, handler的注册以及getHandler的实现
 				mappedHandler = getHandler(processedRequest, false);
 				if (mappedHandler == null || mappedHandler.getHandler() == null) {
+					// 这里就是输出日志, 并返回404的状态
 					noHandlerFound(processedRequest, response);
 					return;
 				}
 
 				// Determine handler adapter for the current request.
+				// 这里回去验证对应的请求是否合法等
 				HandlerAdapter ha = getHandlerAdapter(mappedHandler.getHandler());
 
-                // Process last-modified header, if supported by the handler.
+        // Process last-modified header, if supported by the handler.
 				String method = request.getMethod();
 				boolean isGet = "GET".equals(method);
 				if (isGet || "HEAD".equals(method)) {
@@ -774,10 +794,12 @@ public class DispatcherServlet extends FrameworkServlet {
 				}
 
 				// Apply preHandle methods of registered interceptors.
+				// 为配置的拦截器配置预处理方法, 从HandlerExecutionChain中去除Interceptor进行前处理
 				HandlerInterceptor[] interceptors = mappedHandler.getInterceptors();
 				if (interceptors != null) {
 					for (int i = 0; i < interceptors.length; i++) {
 						HandlerInterceptor interceptor = interceptors[i];
+						// 在Interceptor的preHandle处理完成之后, 如果处理失败, 则触发afterCompletion的方法
 						if (!interceptor.preHandle(processedRequest, response, mappedHandler.getHandler())) {
 							triggerAfterCompletion(mappedHandler, interceptorIndex, processedRequest, response, null);
 							return;
@@ -787,14 +809,17 @@ public class DispatcherServlet extends FrameworkServlet {
 				}
 
 				// Actually invoke the handler.
+				// 通过HandlerAdapter来触发实际的Controller的实现方法
 				mv = ha.handle(processedRequest, response, mappedHandler.getHandler());
 
 				// Do we need view name translation?
+				// 判断是否进行视图名称的转化和翻译
 				if (mv != null && !mv.hasView()) {
 					mv.setViewName(getDefaultViewName(request));
 				}
 
 				// Apply postHandle methods of registered interceptors.
+				// 执行所有的postHandle的方法, 这里需要注意, 在执行postHandle的方法的时候, 是按照从后向前的顺序查找
 				if (interceptors != null) {
 					for (int i = interceptors.length - 1; i >= 0; i--) {
 						HandlerInterceptor interceptor = interceptors[i];
@@ -813,6 +838,7 @@ public class DispatcherServlet extends FrameworkServlet {
 			}
 
 			// Did the handler return a view to render?
+			// 这里使用视图对ModalAndView数据的展现
 			if (mv != null && !mv.wasCleared()) {
 				render(mv, processedRequest, response);
 				if (errorView) {
@@ -1022,8 +1048,10 @@ public class DispatcherServlet extends FrameworkServlet {
 		response.setLocale(locale);
 
 		View view;
+		// 根据ModelAndView中的视图名称进行解析
 		if (mv.isReference()) {
 			// We need to resolve the view name.
+			// 需要对视图名称进行解析
 			view = resolveViewName(mv.getViewName(), mv.getModelInternal(), locale, request);
 			if (view == null) {
 				throw new ServletException(
@@ -1031,8 +1059,10 @@ public class DispatcherServlet extends FrameworkServlet {
 								getServletName() + "'");
 			}
 		}
+		// ModelAndView中可能已经包含了对应的View, 则直接获取即可
 		else {
 			// No need to lookup: the ModelAndView object contains the actual View object.
+			// 从ModelAndView中取出实际的View对象
 			view = mv.getView();
 			if (view == null) {
 				throw new ServletException("ModelAndView [" + mv + "] neither contains a view name nor a " +
@@ -1041,6 +1071,7 @@ public class DispatcherServlet extends FrameworkServlet {
 		}
 
 		// Delegate to the View object for rendering.
+		// 委托View的对象进行渲染
 		if (logger.isDebugEnabled()) {
 			logger.debug("Rendering view [" + view + "] in DispatcherServlet with name '" + getServletName() + "'");
 		}
