@@ -122,8 +122,16 @@ public class CommonsMultipartResolver extends CommonsFileUploadSupport
 		return (request != null && ServletFileUpload.isMultipartContent(request));
 	}
 
+	/**
+	 * 用于结局request对象
+	 *
+	 * @param request the servlet request to wrap (must be of a multipart content type)
+	 * @return
+	 * @throws MultipartException
+	 */
 	public MultipartHttpServletRequest resolveMultipart(final HttpServletRequest request) throws MultipartException {
 		Assert.notNull(request, "Request must not be null");
+		// 如果延迟解决为Request对象
 		if (this.resolveLazily) {
 			return new DefaultMultipartHttpServletRequest(request) {
 				@Override

@@ -96,6 +96,7 @@ public class MultipartFilter extends OncePerRequestFilter {
 		MultipartResolver multipartResolver = lookupMultipartResolver(request);
 
 		HttpServletRequest processedRequest = request;
+		// 判断是否为Multipart的类型请求
 		if (multipartResolver.isMultipart(processedRequest)) {
 			if (logger.isDebugEnabled()) {
 				logger.debug("Resolving multipart request [" + processedRequest.getRequestURI() +

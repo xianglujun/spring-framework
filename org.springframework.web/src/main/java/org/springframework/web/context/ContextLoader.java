@@ -177,6 +177,11 @@ public class ContextLoader {
      * according to the "{@link #CONTEXT_CLASS_PARAM contextClass}" and
      * "{@link #CONFIG_LOCATION_PARAM contextConfigLocation}" context-params.
      *
+     * 这里是初始化ApplicationContext容器的地方，我们可以很明确的恩看到, 这里通过{@link #CONFIG_LOCATION_PARAM contextClass}
+     * 和{@link #CONFIG_LOCATION_PARAM contextConfigLocation}来指定启动容器的类型已经读取的配置的路径, 在没有指定的情况下,
+     * 我们可以看到{@link #DEFAULT_STRATEGIES_PATH ContextLoader.properties}中指定了默认的容器启动类型, 默认使用了{@link org.springframework.web.context.support.XmlWebApplicationContext}
+     * 进行容器的管理
+     *
      * @param servletContext current servlet context
      * @return the new WebApplicationContext
      * @see #CONTEXT_CLASS_PARAM

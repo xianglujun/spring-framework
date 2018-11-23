@@ -86,10 +86,10 @@ public abstract class HttpServletBean extends HttpServlet {
 
 	/**
 	 * Subclasses can invoke this method to specify that this property
-	 * (which must match a JavaBean property they expose) is mandatory,
+	 * (which must match a JavaBean property they expose) is mandatory(强制的),
 	 * and must be supplied as a config parameter. This should be called
 	 * from the constructor of a subclass.
-	 * <p>This method is only relevant in case of traditional initialization
+	 * <p>This method is only relevant(有关的) in case of traditional initialization
 	 * driven by a ServletConfig instance.
 	 * @param property name of the required property
 	 */
