@@ -74,6 +74,8 @@ public abstract class DataSourceUtils {
 	 */
 	public static Connection getConnection(DataSource dataSource) throws CannotGetJdbcConnectionException {
 		try {
+			// 具体的获取事务的链接方式, 是由doGetConnection的方法来完成的
+			// 这里执行了异常的转换
 			return doGetConnection(dataSource);
 		}
 		catch (SQLException ex) {
@@ -96,7 +98,11 @@ public abstract class DataSourceUtils {
 	public static Connection doGetConnection(DataSource dataSource) throws SQLException {
 		Assert.notNull(dataSource, "No DataSource specified");
 
+		// 把对数据的Connection放到事务管理其中进行管理, 如果事务管理器中绑定对应的数据库连接,
+		// 那么就直接使用链接
 		ConnectionHolder conHolder = (ConnectionHolder) TransactionSynchronizationManager.getResource(dataSource);
+
+		// 如果连接已经存在, 并且处于链接状态
 		if (conHolder != null && (conHolder.hasConnection() || conHolder.isSynchronizedWithTransaction())) {
 			conHolder.requested();
 			if (!conHolder.hasConnection()) {
@@ -108,8 +114,12 @@ public abstract class DataSourceUtils {
 		// Else we either got no holder or an empty thread-bound holder here.
 
 		logger.debug("Fetching JDBC Connection from DataSource");
+		// 这里是获取数据链接对象Connection, 该链接是通过连接池对象获取的,
+		// 这个对象会在bean的配置中提前定义好, 最后会通过TransactionSynchronizationManager对象把当前对象
+		// 和创建的链接与当前的线程进行绑定
 		Connection con = dataSource.getConnection();
 
+		// 如果当前线程已经包含了同步事务列表, 如果已经包含了, 则加入
 		if (TransactionSynchronizationManager.isSynchronizationActive()) {
 			logger.debug("Registering transaction synchronization for JDBC Connection");
 			// Use same Connection for further JDBC actions within the transaction.
@@ -121,11 +131,17 @@ public abstract class DataSourceUtils {
 			else {
 				holderToUse.setConnection(con);
 			}
+			// 当前的方法用于统计当前的应用次数
 			holderToUse.requested();
+
+			// 将链接对象, 对当前线程进行绑定
 			TransactionSynchronizationManager.registerSynchronization(
 					new ConnectionSynchronization(holderToUse, dataSource));
+
+			// 标记线程已经与事务进行绑定
 			holderToUse.setSynchronizedWithTransaction(true);
 			if (holderToUse != conHolder) {
+				// 把链接对当前的连接池进行绑定
 				TransactionSynchronizationManager.bindResource(dataSource, holderToUse);
 			}
 		}

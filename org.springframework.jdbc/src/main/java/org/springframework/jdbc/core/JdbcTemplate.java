@@ -373,11 +373,12 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 
 	//-------------------------------------------------------------------------
 	// Methods dealing with static SQL (java.sql.Statement)
+	// 通过Statement的方式执行静态地SQL
 	//-------------------------------------------------------------------------
-
 	public <T> T execute(StatementCallback<T> action) throws DataAccessException {
 		Assert.notNull(action, "Callback object must not be null");
 
+		// 获取Connection的链接对象, 这个对象已经在Spring的事务管理之下的
 		Connection con = DataSourceUtils.getConnection(getDataSource());
 		Statement stmt = null;
 		try {
@@ -386,12 +387,18 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 					this.nativeJdbcExtractor.isNativeConnectionNecessaryForNativeStatements()) {
 				conToUse = this.nativeJdbcExtractor.getNativeConnection(con);
 			}
+
+			// 通过Connection创建Statement对象
 			stmt = conToUse.createStatement();
+
+			// 这里是对Statement的必要的设置, 主要包括了fetchSize, timeOut等信息
 			applyStatementSettings(stmt);
 			Statement stmtToUse = stmt;
 			if (this.nativeJdbcExtractor != null) {
 				stmtToUse = this.nativeJdbcExtractor.getNativeStatement(stmt);
 			}
+
+			// 这里是回调对象的执行
 			T result = action.doInStatement(stmtToUse);
 			handleWarnings(stmt);
 			return result;
@@ -399,6 +406,8 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 		catch (SQLException ex) {
 			// Release Connection early, to avoid potential connection pool deadlock
 			// in the case when the exception translator hasn't been initialized yet.
+			// 如果检测到异常, 把数据库Connection释放掉, 并且抛出Spring自己转换过后的异常
+			// Spring在做者里面实际上是做了一个异常的转换操作。
 			JdbcUtils.closeStatement(stmt);
 			stmt = null;
 			DataSourceUtils.releaseConnection(con, getDataSource());
@@ -411,6 +420,11 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 		}
 	}
 
+	/**
+	 * 通过JDBC执行SQL
+	 * @param sql static SQL to execute
+	 * @throws DataAccessException
+	 */
 	public void execute(final String sql) throws DataAccessException {
 		if (logger.isDebugEnabled()) {
 			logger.debug("Executing SQL statement [" + sql + "]");
@@ -427,16 +441,28 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 		execute(new ExecuteStatementCallback());
 	}
 
+	/**
+	 * 查询的操作
+	 * @param sql SQL query to execute
+	 * @param rse object that will extract all rows of results
+	 * @param <T>
+	 * @return
+	 * @throws DataAccessException
+	 */
 	public <T> T query(final String sql, final ResultSetExtractor<T> rse) throws DataAccessException {
 		Assert.notNull(sql, "SQL must not be null");
 		Assert.notNull(rse, "ResultSetExtractor must not be null");
 		if (logger.isDebugEnabled()) {
 			logger.debug("Executing SQL query [" + sql + "]");
 		}
+
+		// 这里是创建回调的对象
 		class QueryStatementCallback implements StatementCallback<T>, SqlProvider {
 			public T doInStatement(Statement stmt) throws SQLException {
+				// 准备查询结果集
 				ResultSet rs = null;
 				try {
+					// 这里执行SQL查询
 					rs = stmt.executeQuery(sql);
 					ResultSet rsToUse = rs;
 					if (nativeJdbcExtractor != null) {
@@ -452,6 +478,7 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 				return sql;
 			}
 		}
+
 		return execute(new QueryStatementCallback());
 	}
 
